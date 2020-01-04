@@ -1,0 +1,54 @@
+.header {
+  font-size: 14px;
+}
+
+.icon {
+  float: left;
+  width: 60px;
+  margin-right: 20px;
+  background: #d8d8d8;
+  border-radius: 50%;
+}
+
+.wrapper {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.description {
+}
+
+.description span {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 25px;
+}
+
+.degreesC {
+  font-size: 18px;
+}
+
+.degreesC::after {
+  content: '°C'
+}
+
+.essential {
+  font-size: 20px;
+}
+
+.essential > div {
+  margin-bottom: 8px;
+}
+
+.essential_feels_like span {
+  font-weight: bold;
+}
+
+.essential_temp {
+
+}
+
+.essential_humidity {
+
+}
