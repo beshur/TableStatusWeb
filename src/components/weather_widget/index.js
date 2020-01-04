@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import style from './style';
 
-const HOST = 'http://api.openweathermap.org';
+const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;
 
 // 2 hours
