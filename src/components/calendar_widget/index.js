@@ -15,15 +15,7 @@ const KEY = process.env.PREACT_APP_GOOGLE_API_KEY;
 const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 
 // 2 hours
-const API_INTERVAL = 2*60*60*1000;
-
-class GoogleCalActions {
-  constructor() {
-    var authorizeButton = document.getElementById('authorize_button');
-    var signoutButton = document.getElementById('signout_button');
-  }
-
-}
+const API_INTERVAL = 1*60*60*1000;
 
 export default class CalendarWidget extends Component {
   constructor(props) {
@@ -36,6 +28,7 @@ export default class CalendarWidget extends Component {
     this.initClient = this.initClient.bind(this);
     this.updateSigninStatus = this.updateSigninStatus.bind(this);
     this.listUpcomingEvents = this.listUpcomingEvents.bind(this);
+    this.timer = null;
   }
   /**
    *  On load, called to load the auth2 library and API client library.
@@ -133,6 +126,8 @@ export default class CalendarWidget extends Component {
     if (this.props.googleApiLoaded) {
       this.handleClientLoad();
     }
+
+    this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
   }
 
   componentDidUpdate(prevProps) {
@@ -143,6 +138,7 @@ export default class CalendarWidget extends Component {
   }
 
   componentWillUnmount() {
+    clearInterval(this.timer);
   }
 
   render() {
