@@ -2,13 +2,12 @@ import { h } from 'preact';
 import style from './style';
 
 import WeatherWidget from '../../components/weather_widget';
+import CalendarWidget from '../../components/calendar_widget';
 
-const Home = () => (
+const Home = (props) => (
 	<div class={style.home}>
-		<h1>Yo</h1>
-		<p>This is the Home component.</p>
-
     <WeatherWidget />
+    <CalendarWidget googleApiLoaded={props.googleApiLoaded} />
 	</div>
 );
 

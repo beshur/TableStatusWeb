@@ -17,12 +17,35 @@ export default class App extends Component {
 		this.currentUrl = e.url;
 	};
 
-	render() {
+	state = {
+		googleApiLoaded: false
+	}
+
+	componentDidMount() {
+		this.loadExternals();
+	}
+
+	loadExternals() {
+		const googleApi = () => {
+			const script = document.createElement("script");
+			script.async = true;
+			script.defer = true;
+			script.src = "https://apis.google.com/js/api.js"
+      script.onload = () => this.setState({googleApiLoaded: true});
+      script.onreadystatechange = "if (this.readyState === 'complete') this.onload()"
+
+      document.body.appendChild(script);
+		}
+
+		googleApi();
+	}
+
+	render({}, {googleApiLoaded}) {
 		return (
 			<div id="app">
 				<Header />
 				<Router onChange={this.handleRoute}>
-					<Home path="/" />
+					<Home path="/" googleApiLoaded={googleApiLoaded} />
 					<Profile path="/profile/" user="me" />
 					<Profile path="/profile/:user" />
 				</Router>
