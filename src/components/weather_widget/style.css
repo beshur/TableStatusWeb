@@ -19,13 +19,11 @@
 }
 
 .description span {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 25px;
+  font-size: 30px;
 }
 
 .degreesC {
-  font-size: 18px;
+  font-size: 40px;
 }
 
 .degreesC::after {
@@ -40,14 +38,18 @@
   margin-bottom: 8px;
 }
 
+.essential_feels_like {
+  font-size: 24px;
+}
+
 .essential_feels_like span {
-  font-weight: bold;
+  font-size: inherit;
 }
 
 .essential_temp {
-
+  font-size: 30px;
 }
 
 .essential_humidity {
-
+  font-size: 24px;
 }

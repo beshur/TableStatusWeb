@@ -59,18 +59,17 @@ export default class WeatherWidget extends Component {
       <div class={style.header}>
         <h1>Погода</h1>
         <div class={style.wrapper}>
-          <div class={style.essential}>
-
-            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{data.main.feels_like}</span></div>
+          <div class={style.description}>
+            <img class={style.icon} src={ 'http://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
+            <span>{data.weather[0].description}</span>
             <div class={style.essential_temp}>
               <span class={style.degreesC}>{data.main.temp_max}</span> /
               <span class={style.degreesC}>{data.main.temp_min}</span>
             </div>
-            <div class={style.humidity}>Влажность {data.main.humidity}%</div>
           </div>
-          <div class={style.description}>
-            <img class={style.icon} src={ 'http://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
-            <span>{data.weather[0].description}</span>
+          <div class={style.essential}>
+            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{data.main.feels_like}</span></div>
+            <div class={style.essential_humidity}>Влажность {data.main.humidity}%</div>
           </div>
         </div>
 
