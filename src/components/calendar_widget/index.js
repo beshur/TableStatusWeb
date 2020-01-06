@@ -66,7 +66,6 @@ export default class CalendarWidget extends Component {
    */
   updateSigninStatus(isSignedIn) {
     this.setState({ signedIn: isSignedIn });
-    console.log('Calendar: isSignedIn', isSignedIn);
     setTimeout(this.listUpcomingEvents, 0);
   }
 
@@ -95,8 +94,6 @@ export default class CalendarWidget extends Component {
     }
     const today = moment(moment().format('MMMM D YYYY')).toISOString();
     const tomorrow = moment(moment().add(1, 'day').format('MMMM D YYYY')).toISOString();
-
-    console.log(today, tomorrow);
     gapi.client.calendar.events.list({
       'calendarId': CALENDAR_ID,
       'timeMin': today,
@@ -107,8 +104,6 @@ export default class CalendarWidget extends Component {
       'orderBy': 'startTime'
     }).then((response) => {
       var events = response.result.items;
-      console.log('Calendar events', events);
-
       this.setState({events});
     });
   }
@@ -122,7 +117,6 @@ export default class CalendarWidget extends Component {
 
   // gets called when this route is navigated to
   componentDidMount() {
-    console.log('Calendar props', this.props);
     if (this.props.googleApiLoaded) {
       this.handleClientLoad();
     }
@@ -131,7 +125,6 @@ export default class CalendarWidget extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    console.log('Calendar update props', this.props);
     if (!prevProps.googleApiLoaded && this.props.googleApiLoaded) {
       this.handleClientLoad();
     }

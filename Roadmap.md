@@ -5,7 +5,7 @@
 
 + Weather (openweathermap integration)
 + Agenda for the day (google cal integration)
-- Notes
++ Notes
 - Photos (?)
 - Blog (WP integration)
 - Wishlist (hotelka integration)
