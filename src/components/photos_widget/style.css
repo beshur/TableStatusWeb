@@ -51,3 +51,7 @@
 .selectOther span:first-child {
   float: right;
 }
+
+.collapse_after ~ * {
+  display: none;
+}

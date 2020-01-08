@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import moment from 'moment';
 
+import CollapseWidget from '../collapse_widget';
 import style from './style';
 
 // ShuSu
@@ -22,7 +23,8 @@ export default class PhotosWidget extends Component {
       albums: [],
       selectedAlbum: {},
       selectedAlbumPhotos: [],
-      randomPicIndex: null
+      randomPicIndex: null,
+      collapsed: false
     }
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
@@ -117,7 +119,10 @@ export default class PhotosWidget extends Component {
   render() {
     return (
       <div class={this.state.selectedAlbum.id ? 'selected' : ''}>
-        <h1>{this.state.selectedAlbum.title ? this.state.selectedAlbum.title : 'Фото'}</h1>
+        <h1 class={this.state.collapsed ? style.collapse_after : null}>
+          {this.state.selectedAlbum.title ? this.state.selectedAlbum.title : 'Фото'}
+           <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} />
+        </h1>
         <div class={this.state.selectedAlbum.id ? style.hide : ''}>
           {
             this.state.albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )

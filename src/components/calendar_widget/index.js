@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import moment from 'moment';
 
+import CollapseWidget from '../collapse_widget';
 import style from './style';
 
 // ShuSu
@@ -14,7 +15,8 @@ export default class CalendarWidget extends Component {
     super(props);
     this.state = {
       signedIn: false,
-      events: []
+      events: [],
+      collapsed: false
     }
 
     this.timer = null;
@@ -69,8 +71,8 @@ export default class CalendarWidget extends Component {
   render() {
     return (
       <div>
-        <h1>Сегодня</h1>
-        <div>
+        <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
+        <div class={this.state.collapsed ? style.hide : null}>
           {
             this.state.events.map((item) => <CalendarItem item={item} /> )
           }
