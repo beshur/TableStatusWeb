@@ -3,14 +3,6 @@ import moment from 'moment';
 
 import style from './style';
 
-// Array of API discovery doc URLs for APIs used by the quickstart
-const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'];
-
-// Authorization scopes required by the API; multiple scopes can be
-// included, separated by spaces.
-const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
-const CLIENT = process.env.PREACT_APP_GOOGLE_CLIENT;
-const KEY = process.env.PREACT_APP_GOOGLE_API_KEY;
 // ShuSu
 const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 

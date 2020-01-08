@@ -1,0 +1,53 @@
+.album span {
+  font-size: 18px;
+  cursor: pointer;
+  border-bottom: 1px dotted #ddd;
+}
+
+.selected {
+
+}
+.selected .albums {
+  display: none;
+}
+.selected .photos {
+  display: block;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.photo {
+  width: 100%;
+  height: 400px;
+  background: url(/assets/ajax-loader.gif) 50% 50% no-repeat;
+  background-size: contain;
+}
+
+.loading {
+  background-size: fit;
+}
+
+.video {
+  width: 100%;
+  height: 400px;
+}
+
+.selectOther {
+  font-size: 14px;
+  color: #666;
+}
+
+.selectOther span {
+  display: inline-block;
+  margin: 5px 15px;
+}
+
+.selectOther span:first-child {
+  float: right;
+}

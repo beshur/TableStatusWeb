@@ -3,6 +3,7 @@ import style from './style';
 
 const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;
+const LOCATION = process.env.PREACT_APP_WEATHER_LOCATION;
 
 // 2 hours
 const API_INTERVAL = 2*60*60*1000;
@@ -26,7 +27,7 @@ export default class WeatherWidget extends Component {
   };
 
   apiUrl() {
-    return HOST + '/data/2.5/weather?q=Odessa,ua&lang=ru&units=metric&appid=' + KEY;
+    return `${HOST}/data/2.5/weather?q=${LOCATION}&lang=ru&units=metric&appid=${KEY}`;
   }
 
   async getWeather() {
@@ -60,7 +61,7 @@ export default class WeatherWidget extends Component {
         <h1>Погода</h1>
         <div class={style.wrapper}>
           <div class={style.description}>
-            <img class={style.icon} src={ 'http://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
+            <img class={style.icon} src={ 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
             <span>{data.weather[0].description}</span>
             <div class={style.essential_temp}>
               <span class={style.degreesC}>{data.main.temp_max}</span> /
