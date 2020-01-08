@@ -47,6 +47,7 @@
 }
 
 .essential_temp {
+  white-space: nowrap;
   font-size: 30px;
 }
 
