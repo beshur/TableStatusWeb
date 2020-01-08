@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import moment from 'moment';
 
 import style from './style';
+import { StorageMixin } from '../../lib/mixins';
 
 // ShuSu
 const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
@@ -10,24 +11,39 @@ const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 const API_INTERVAL = 1*60*60*1000;
 
 export default class CalendarWidget extends Component {
+  state = {
+    signedIn: false,
+    calendarId: '',
+    calendars: [],
+    events: []
+  }
+
   constructor(props) {
     super(props);
-    this.state = {
-      signedIn: false,
-      events: []
-    }
-
+    Object.assign(this, new StorageMixin('CalendarWidget'));
     this.timer = null;
   }
 
+  listCalendars() {
+    if (!this.props.signedIn) {
+      return;
+    }
+    gapi.client.calendar.calendarList.list().then((response) => {
+      let calendars = response.result.items;
+      console.log('Calendars count', calendars.length);
+      this.setState({calendars});
+    });
+  }
+
   listUpcomingEvents() {
+    console.log('listUpcomingEvents', this.state.calendarId, this.props.signedIn);
     if (!this.props.signedIn) {
       return;
     }
     const today = moment(moment().format('MMMM D YYYY')).toISOString();
     const tomorrow = moment(moment().add(1, 'day').format('MMMM D YYYY')).toISOString();
     gapi.client.calendar.events.list({
-      'calendarId': CALENDAR_ID,
+      'calendarId': this.state.calendarId,
       'timeMin': today,
       'timeMax': tomorrow,
       'showDeleted': false,
@@ -35,7 +51,7 @@ export default class CalendarWidget extends Component {
       'maxResults': 10,
       'orderBy': 'startTime'
     }).then((response) => {
-      var events = response.result.items;
+      let events = response.result.items;
       this.setState({events});
     });
   }
@@ -47,18 +63,30 @@ export default class CalendarWidget extends Component {
     this.handleSignoutClick();
   }
 
-  // gets called when this route is navigated to
-  componentDidMount() {
-    if (this.props.signedIn) {
-      this.listUpcomingEvents();
-    }
+  onSelectCalendar(calendar) {
+    this.saveState({
+      calendarId: calendar.id
+    });
 
     this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
+    setTimeout(() => this.listUpcomingEvents(), 0);
+  }
+
+  // gets called when this route is navigated to
+  componentDidMount() {
+    this.loadState(['calendarId']);
+
+    if (this.props.signedIn) {
+      this.listCalendars();
+    }
   }
 
   componentDidUpdate(prevProps) {
     if (!prevProps.signedIn && this.props.signedIn) {
-      this.listUpcomingEvents();
+      this.listCalendars();
+    }
+    if (this.state.calendarId) {
+      this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
     }
   }
 
@@ -66,14 +94,27 @@ export default class CalendarWidget extends Component {
     clearInterval(this.timer);
   }
 
+  selectOther() {
+    this.setState({calendarId: null});
+  }
+
   render() {
     return (
       <div>
         <h1>Сегодня</h1>
-        <div>
+        <div class={this.state.calendarId ? style.hide : '' }>
           {
-            this.state.events.map((item) => <CalendarItem item={item} /> )
+            this.state.calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
           }
+        </div>
+        <div class={!this.state.calendarId ? style.hide : '' }>
+          {
+            this.state.events.map((item) => <CalendarEvent item={item} /> )
+          }
+        </div>
+
+        <div class={style.selectOther} onClick={() => this.selectOther()}>
+          Выбрать другой календарь
         </div>
       </div>
     );
@@ -81,6 +122,18 @@ export default class CalendarWidget extends Component {
 }
 
 export class CalendarItem extends Component {
+  render({item}) {
+    let inlineStyle = `background-color: ${item.backgroundColor}; color: ${item.foregroundColor}`
+    return (
+      <div
+        onClick={this.props.onSelect}
+        style={inlineStyle}
+        class={style.calendarItem}>{item.summary}</div>);
+  }
+}
+
+
+export class CalendarEvent extends Component {
   formatDate(dateTime) {
     if (dateTime === undefined) {
       return '';
