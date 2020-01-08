@@ -25,71 +25,11 @@ export default class CalendarWidget extends Component {
       events: []
     }
 
-    this.initClient = this.initClient.bind(this);
-    this.updateSigninStatus = this.updateSigninStatus.bind(this);
-    this.listUpcomingEvents = this.listUpcomingEvents.bind(this);
     this.timer = null;
   }
-  /**
-   *  On load, called to load the auth2 library and API client library.
-   */
-  handleClientLoad() {
-    gapi.load('client:auth2', this.initClient);
-  }
 
-  /**
-   *  Initializes the API client library and sets up sign-in state
-   *  listeners.
-   */
-  initClient() {
-    gapi.client.init({
-      apiKey: KEY,
-      clientId: CLIENT,
-      discoveryDocs: DISCOVERY_DOCS,
-      scope: SCOPES
-    }).then(() => {
-      // Listen for sign-in state changes.
-      gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
-
-      // Handle the initial sign-in state.
-      this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-      // authorizeButton.onclick = handleAuthClick;
-      // signoutButton.onclick = handleSignoutClick;
-    }, (error) => {
-      console.error('Calendar', error);
-    });
-  }
-
-  /**
-   *  Called when the signed in status changes, to update the UI
-   *  appropriately. After a sign-in, the API is called.
-   */
-  updateSigninStatus(isSignedIn) {
-    this.setState({ signedIn: isSignedIn });
-    setTimeout(this.listUpcomingEvents, 0);
-  }
-
-  /**
-   *  Sign in the user upon button click.
-   */
-  handleAuthClick(event) {
-    gapi.auth2.getAuthInstance().signIn();
-  }
-
-  /**
-   *  Sign out the user upon button click.
-   */
-  handleSignoutClick(event) {
-    gapi.auth2.getAuthInstance().signOut();
-  }
-
-  /**
-   * Print the summary and start datetime/date of the next ten events in
-   * the authorized user's calendar. If no events are found an
-   * appropriate message is printed.
-   */
   listUpcomingEvents() {
-    if (!this.state.signedIn) {
+    if (!this.props.signedIn) {
       return;
     }
     const today = moment(moment().format('MMMM D YYYY')).toISOString();
@@ -117,16 +57,16 @@ export default class CalendarWidget extends Component {
 
   // gets called when this route is navigated to
   componentDidMount() {
-    if (this.props.googleApiLoaded) {
-      this.handleClientLoad();
+    if (this.props.signedIn) {
+      this.listUpcomingEvents();
     }
 
     this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
   }
 
   componentDidUpdate(prevProps) {
-    if (!prevProps.googleApiLoaded && this.props.googleApiLoaded) {
-      this.handleClientLoad();
+    if (!prevProps.signedIn && this.props.signedIn) {
+      this.listUpcomingEvents();
     }
   }
 
@@ -138,8 +78,6 @@ export default class CalendarWidget extends Component {
     return (
       <div>
         <h1>Сегодня</h1>
-        <button class={this.state.signedIn ? style.hide : ''} onClick={() => this.onAuthorize()}>Залогиниться в гугле</button>
-
         <div>
           {
             this.state.events.map((item) => <CalendarItem item={item} /> )
@@ -150,8 +88,7 @@ export default class CalendarWidget extends Component {
   }
 }
 
-
-class CalendarItem extends Component {
+export class CalendarItem extends Component {
   formatDate(dateTime) {
     if (dateTime === undefined) {
       return '';

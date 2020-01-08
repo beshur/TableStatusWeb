@@ -1,0 +1,17 @@
+button {
+  padding: 15px 20px;
+  font-size: 20px;
+  background: rgba(80, 150, 255, 0.05);
+  border-radius: 8px;
+  box-shadow: none;
+  border: 1px solid #ddd;
+}
+button img {
+  max-width: 22px;
+  float: left;
+  margin-right: 12px;
+}
+
+.hide {
+  display: none;
+}

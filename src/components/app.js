@@ -43,7 +43,7 @@ export default class App extends Component {
 	render({}, {googleApiLoaded}) {
 		return (
 			<div id="app">
-				<Header />
+				<Header  />
 				<Router onChange={this.handleRoute}>
 					<Home path="/" googleApiLoaded={googleApiLoaded} />
 					<Profile path="/profile/" user="me" />
