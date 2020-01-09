@@ -16,7 +16,7 @@ You need to obtain:
 
 I use Netlify to deploy:
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/beshur/https://github.com/beshur/TableStatusWeb)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/beshur/TableStatusWeb)
 
 
 ## CLI Commands
