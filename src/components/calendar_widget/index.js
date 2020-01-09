@@ -55,7 +55,7 @@ export default class CalendarWidget extends Component {
       this.listUpcomingEvents();
     }
 
-    this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
+    this.timer = setInterval(() => this.listUpcomingEvents(), API_INTERVAL);
   }
 
   componentDidUpdate(prevProps) {
