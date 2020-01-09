@@ -172,16 +172,16 @@ export class PhotosWidgetPhotos extends Component {
     // console.log('photos render', imgUrl, bg);
     return (
       <div class={style.photo} style={bg}>
-        { videoUrl ? (<PhotosWidgetVideo src={videoUrl} />) : ''}
+        { videoUrl ? (<PhotosWidgetVideo src={videoUrl} img={imgUrl} />) : ''}
       </div>
     );
   }
 }
 
 export class PhotosWidgetVideo extends Component {
-  render({src}) {
+  render({src, img}) {
     return (
-      <video controls src={src} preload="none" class={style.video} />
+      <video controls src={src} poster={img} preload="none" class={style.video} />
     );
   }
 }
