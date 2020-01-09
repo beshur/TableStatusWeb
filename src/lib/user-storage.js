@@ -2,7 +2,7 @@
  * localStorage wrapper
  */
 export default class UserStorage {
-  storage = localStorage;
+  storage = window.localStorage;
 
   constructor(options) {
     this.prefix = options.prefix;
