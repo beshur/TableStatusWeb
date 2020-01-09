@@ -76,6 +76,10 @@ export default class CalendarWidget extends Component {
           {
             this.state.events.map((item) => <CalendarItem item={item} /> )
           }
+
+          <div class={this.state.events.length ? style.hide : null}>
+            Ничего не запланировано
+          </div>
         </div>
       </div>
     );

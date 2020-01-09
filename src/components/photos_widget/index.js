@@ -124,6 +124,7 @@ export default class PhotosWidget extends Component {
            <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} />
         </h1>
         <div class={this.state.selectedAlbum.id ? style.hide : ''}>
+          <p>Выберите альбомы для слайдшоу:</p>
           {
             this.state.albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
           }
