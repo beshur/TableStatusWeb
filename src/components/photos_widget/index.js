@@ -16,8 +16,8 @@ const PHOTO_HEIGHT = 512;
 const ALBUMS_LIMIT = 15;
 const PHOTOS_LIMIT = 50;
 
-const STORE_ALBUM_KEY = 'PHOTOS_ALBUM';
-const STORE_ALBUM_PHOTOS = 'PHOTOS_ALBUM_PHOTOS';
+const STORE_ALBUM_KEY = 'ALBUM';
+const STORE_ALBUM_PHOTOS = 'PHOTOS';
 
 
 export default class PhotosWidget extends Component {
@@ -32,7 +32,9 @@ export default class PhotosWidget extends Component {
       collapsed: false
     }
 
-    this.storage = new UserStorage();
+    this.storage = new UserStorage({
+      prefix: 'STENGAZETA_PHOTOS'
+    });
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
     this.getPicByIndex = this.getPicByIndex.bind(this);

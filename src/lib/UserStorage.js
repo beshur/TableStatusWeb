@@ -2,7 +2,9 @@
  * localStorage wrapper
  */
 export default class UserStorage {
-  constructor() {
+  constructor(options) {
+    this.prefix = options.prefix;
+
     if (typeof window !== 'undefined') {
       // ugly build hack
       this.engine = localStorage;
@@ -16,10 +18,10 @@ export default class UserStorage {
   }
 
   getItem(key) {
-    return this.engine.getItem(key);
+    return this.engine.getItem(this.prefix + key);
   }
 
   setItem(key, value) {
-    return this.engine.setItem(key, value);
+    return this.engine.setItem(this.prefix + key, value);
   }
 }
