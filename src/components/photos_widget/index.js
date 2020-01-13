@@ -43,27 +43,33 @@ export default class PhotosWidget extends Component {
     if (!this.props.signedIn) {
       return;
     }
+
+    this.listMyAlbums();
+    this.listSharedAlbums();
+  }
+
+  listMyAlbums() {
     gapi.client.photoslibrary.albums.list({
       'pageSize': ALBUMS_LIMIT
     }).then((response) => {
       let albums = response.result.albums;
       console.log('Photos Albums', albums);
-      this.setState({albums});
+      this.setState((state) => ({
+        albums: state.albums.concat(albums)
+      }));
 
-      this.listSharedAlbums();
     });
   }
 
   listSharedAlbums() {
-    if (!this.props.signedIn) {
-      return;
-    }
     gapi.client.photoslibrary.sharedAlbums.list({
       'pageSize': ALBUMS_LIMIT
     }).then((response) => {
       let albums = response.result.sharedAlbums;
       console.log('Shared Photos Albums', albums);
-      this.setState({albums: this.state.albums.concat(albums)});
+      this.setState((state) => ({
+        albums: state.albums.concat(albums)
+      }));
     });
   }
 
@@ -158,6 +164,9 @@ export default class PhotosWidget extends Component {
     }
 
     console.log('Photos, restored', albumObj, photosObj);
+    if (albumObj === null || photosObj === null) {
+      return false;
+    }
     this.setState({
       selectedAlbum: albumObj,
       selectedAlbumPhotos: photosObj
