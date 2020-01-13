@@ -12,8 +12,12 @@ const ROTATION_INTERVAL = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL;
 const PHOTO_WIDTH = 1024;
 const PHOTO_HEIGHT = 512;
 
-const ALBUMS_LIMIT = 20;
-const PHOTOS_LIMIT = 20;
+const ALBUMS_LIMIT = 15;
+const PHOTOS_LIMIT = 50;
+
+const STORE_ALBUM_KEY = 'PHOTOS_ALBUM';
+const STORE_ALBUM_PHOTOS = 'PHOTOS_ALBUM_PHOTOS';
+
 
 export default class PhotosWidget extends Component {
   constructor(props) {
@@ -26,6 +30,8 @@ export default class PhotosWidget extends Component {
       randomPicIndex: null,
       collapsed: false
     }
+
+    this.storage = window.localStorage;
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
     this.getPicByIndex = this.getPicByIndex.bind(this);
@@ -42,6 +48,21 @@ export default class PhotosWidget extends Component {
       let albums = response.result.albums;
       console.log('Photos Albums', albums);
       this.setState({albums});
+
+      this.listSharedAlbums();
+    });
+  }
+
+  listSharedAlbums() {
+    if (!this.props.signedIn) {
+      return;
+    }
+    gapi.client.photoslibrary.sharedAlbums.list({
+      'pageSize': ALBUMS_LIMIT
+    }).then((response) => {
+      let albums = response.result.sharedAlbums;
+      console.log('Shared Photos Albums', albums);
+      this.setState({albums: this.state.albums.concat(albums)});
     });
   }
 
@@ -57,6 +78,8 @@ export default class PhotosWidget extends Component {
       console.log('Photos', photos);
       this.setState({selectedAlbumPhotos: photos});
       this.startRandomRotator(photos);
+
+      this.storage.setItem(STORE_ALBUM_PHOTOS, JSON.stringify(photos));
     });
   }
 
@@ -90,6 +113,7 @@ export default class PhotosWidget extends Component {
 
   // gets called when this route is navigated to
   componentDidMount() {
+    this.getFromStorage();
     if (this.props.signedIn) {
       this.listAlbums();
     }
@@ -108,12 +132,38 @@ export default class PhotosWidget extends Component {
   onAlbumSelected(album) {
     console.log('onAlbumSelected', album);
     this.setState({selectedAlbum: album});
+
+    this.storage.setItem(STORE_ALBUM_KEY, JSON.stringify(album));
     setTimeout(this.listPhotosOfAlbum.bind(this), 0);
   }
 
   selectOther() {
     this.setState({selectedAlbum: {}});
     clearInterval(this.timer);
+  }
+
+  getFromStorage() {
+    const album = this.storage.getItem(STORE_ALBUM_KEY);
+    const photos = this.storage.getItem(STORE_ALBUM_PHOTOS);
+    let albumObj = {};
+    let photosObj = [];
+
+    try {
+      albumObj = JSON.parse(album);
+      photosObj = JSON.parse(photos);
+    } catch(err) {
+      console.error('Photos, restoring from storage failed', err);
+      return false;
+    }
+
+    console.log('Photos, restored', albumObj, photosObj);
+    this.setState({
+      selectedAlbum: albumObj,
+      selectedAlbumPhotos: photosObj
+    });
+    this.startRandomRotator(photosObj);
+
+    return true;
   }
 
   render() {
