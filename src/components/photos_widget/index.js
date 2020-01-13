@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import moment from 'moment';
 
+import UserStorage from '../../lib/UserStorage';
 import CollapseWidget from '../collapse_widget';
 import style from './style';
 
@@ -31,7 +32,7 @@ export default class PhotosWidget extends Component {
       collapsed: false
     }
 
-    this.storage = window.localStorage;
+    this.storage = new UserStorage();
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
     this.getPicByIndex = this.getPicByIndex.bind(this);
