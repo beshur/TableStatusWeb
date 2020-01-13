@@ -146,6 +146,7 @@ export default class PhotosWidget extends Component {
 
   selectOther() {
     this.setState({selectedAlbum: {}});
+    this.storage.setItem(STORE_ALBUM_KEY, null);
     clearInterval(this.timer);
   }
 
