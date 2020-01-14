@@ -244,7 +244,7 @@ export class PhotosWidgetPhotos extends Component {
 export class PhotosWidgetVideo extends Component {
   render({src, img}) {
     return (
-      <video controls src={src} poster={img} preload="none" class={style.video} />
+      <video controls="true" type="video/mp4" src={src} poster={img} preload="none" class={style.video} />
     );
   }
 }
