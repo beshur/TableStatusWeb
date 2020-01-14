@@ -151,7 +151,8 @@ export default class PhotosWidget extends Component {
     // iOS does not play Google Photos mp4
     if (typeof window !== 'undefined') {
       // ugly build hack
-      return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+      return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     } else {
       return false;
     }
