@@ -14,7 +14,7 @@ const PHOTO_WIDTH = 1024;
 const PHOTO_HEIGHT = 512;
 
 const ALBUMS_LIMIT = 15;
-const PHOTOS_LIMIT = 50;
+const PHOTOS_LIMIT = 100;
 
 const STORE_ALBUM_KEY = 'ALBUM';
 const STORE_ALBUM_PHOTOS = 'PHOTOS';
@@ -35,6 +35,7 @@ export default class PhotosWidget extends Component {
     this.storage = new UserStorage({
       prefix: 'STENGAZETA_PHOTOS'
     });
+    this.excludeVideos = false;
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
     this.getPicByIndex = this.getPicByIndex.bind(this);
@@ -112,7 +113,12 @@ export default class PhotosWidget extends Component {
     let photo = photos[itemIndex];
     if (!photo) {
       console.error('Photos index non-existent', itemIndex, photos);
+      return this.selectRandomPic(photos);
     }
+    if (this.excludeVideos && photo.mediaMetadata.video) {
+      return this.selectRandomPic(photos);
+    }
+
     this.setState({ randomPicIndex: itemIndex });
   }
 
@@ -120,8 +126,19 @@ export default class PhotosWidget extends Component {
     return this.state.selectedAlbumPhotos[this.state.randomPicIndex];
   }
 
+  testIOS() {
+    // iOS does not play Google Photos mp4
+    if (typeof window !== 'undefined') {
+      // ugly build hack
+      return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+    } else {
+      return false;
+    }
+  }
+
   // gets called when this route is navigated to
   componentDidMount() {
+    this.excludeVideos = this.testIOS();
     this.getFromStorage();
     if (this.props.signedIn) {
       this.listAlbums();
@@ -224,9 +241,6 @@ export class PhotosWidgetPhotos extends Component {
     let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
     let videoUrl ='';
     let imgUrl = photo.baseUrl + suffix;
-    if (!photo.mediaMetadata) {
-      debugger;
-    }
     if (photo.mediaMetadata.video) {
       videoUrl = photo.baseUrl + '=dv';
     }
