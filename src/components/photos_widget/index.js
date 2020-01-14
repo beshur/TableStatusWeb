@@ -18,16 +18,19 @@ const PHOTOS_LIMIT = 100;
 
 const STORE_ALBUM_KEY = 'ALBUM';
 const STORE_ALBUM_PHOTOS = 'PHOTOS';
+const STORE_ALBUM_SINGLE_PHOTO = 'PHOTO';
 
 
 export default class PhotosWidget extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      signedIn: false,
       albums: [],
       selectedAlbum: {},
       selectedAlbumPhotos: [],
+      randomPic: {
+        mediaMetadata: {}
+      },
       randomPicIndex: null,
       collapsed: false
     }
@@ -94,6 +97,7 @@ export default class PhotosWidget extends Component {
   }
 
   startRandomRotator(photos) {
+    console.log('Photos startRandomRotator');
     clearInterval(this.timer);
 
     this.selectRandomPic(photos);
@@ -105,6 +109,7 @@ export default class PhotosWidget extends Component {
   }
 
   selectRandomPic(photos) {
+    console.log('selectRandomPic', photos);
     if (!photos.length) {
       return;
     }
@@ -119,14 +124,30 @@ export default class PhotosWidget extends Component {
       return this.selectRandomPic(photos);
     }
 
-    this.setState({ randomPicIndex: itemIndex });
+    this.fetchPicture(photo.id);
+  }
+
+  fetchPicture(id) {
+    if (!this.props.signedIn) {
+      return;
+    }
+    gapi.client.photoslibrary.mediaItems.get({
+      'mediaItemId': id
+    }).then((response) => {
+      let photo = response.result;
+      console.log('Photos fetchPicture', response.result);
+
+      this.setState({ randomPic: photo });
+      this.storage.setItem(STORE_ALBUM_SINGLE_PHOTO, JSON.stringify(photo));
+    });
+
   }
 
   getPicByIndex() {
     return this.state.selectedAlbumPhotos[this.state.randomPicIndex];
   }
 
-  testIOS() {
+  isIOS() {
     // iOS does not play Google Photos mp4
     if (typeof window !== 'undefined') {
       // ugly build hack
@@ -138,7 +159,7 @@ export default class PhotosWidget extends Component {
 
   // gets called when this route is navigated to
   componentDidMount() {
-    this.excludeVideos = this.testIOS();
+    this.excludeVideos = this.isIOS();
     this.getFromStorage();
     if (this.props.signedIn) {
       this.listAlbums();
@@ -148,6 +169,11 @@ export default class PhotosWidget extends Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.signedIn && this.props.signedIn) {
       this.listAlbums();
+
+      console.log('componentDidUpdate', this.state)
+      if (this.state.selectedAlbum.id) {
+        this.startRandomRotator(this.state.selectedAlbumPhotos);
+      }
     }
   }
 
@@ -211,7 +237,7 @@ export default class PhotosWidget extends Component {
         </div>
 
         <div class={!this.state.selectedAlbum.id ? style.hide : ''}>
-          <PhotosWidgetPhotos photo={this.state.randomPicIndex} getPicByIndex={this.getPicByIndex}></PhotosWidgetPhotos>
+          <PhotosWidgetPhotos photo={this.state.randomPic}></PhotosWidgetPhotos>
         </div>
         <div class={!this.state.selectedAlbum.id ? style.hide : style.selectOther}>
           <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
@@ -233,11 +259,7 @@ export class PhotosWidgetAlbum extends Component {
 }
 
 export class PhotosWidgetPhotos extends Component {
-  render({getPicByIndex}) {
-    const photo = getPicByIndex();
-    if (!photo) {
-      return (<div class={style.photo + style.loading}></div>);
-    }
+  render({photo}) {
     let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
     let videoUrl ='';
     let imgUrl = photo.baseUrl + suffix;
