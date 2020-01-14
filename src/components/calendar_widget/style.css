@@ -12,3 +12,11 @@
 .hide {
   display: none;
 }
+
+.clock {
+  float: left;
+}
+
+.events {
+  margin-left: 200px;
+}
