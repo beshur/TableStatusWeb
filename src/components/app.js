@@ -6,6 +6,8 @@ import Header from './header';
 // Code-splitting is automated for routes
 import Home from '../routes/home';
 
+import BuildId from './build_id';
+
 export default class App extends Component {
 
 	/** Gets fired when the route changes.
@@ -46,6 +48,8 @@ export default class App extends Component {
 				<Router onChange={this.handleRoute}>
 					<Home path="/" googleApiLoaded={googleApiLoaded} />
 				</Router>
+
+				<BuildId />
 			</div>
 		);
 	}
