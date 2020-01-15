@@ -25,8 +25,8 @@ export default class Home extends Component {
 
   render({googleApiLoaded}, {signedIn}) {
     return (<div class={style.home}>
-      <ClockWidget />
       <WeatherWidget />
+      <ClockWidget />
       <CalendarWidget signedIn={signedIn} />
       <PhotosWidget signedIn={signedIn} />
       <NotesWidget storageKey="STENGAZETA_NOTES" header="Заметки" />

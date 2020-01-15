@@ -1,7 +1,6 @@
 import { h, Component } from 'preact';
 import moment from 'moment';
 
-import ClockWidget from '../clock_widget';
 import CollapseWidget from '../collapse_widget';
 import style from './style';
 
@@ -75,9 +74,6 @@ export default class CalendarWidget extends Component {
         <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
         <div class={this.state.collapsed ? style.hide : null}>
 
-          <div class={style.clock}>
-            <ClockWidget />
-          </div>
           <div class={style.events}>
             {
               this.state.events.map((item) => <CalendarItem item={item} /> )
