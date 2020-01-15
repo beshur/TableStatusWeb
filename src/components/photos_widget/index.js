@@ -38,7 +38,16 @@ export default class PhotosWidget extends Component {
     this.storage = new UserStorage({
       prefix: 'STENGAZETA_PHOTOS'
     });
-    this.excludeVideos = false;
+    this.isIOS = function() {
+      // iOS does not play Google Photos mp4
+      if (typeof window !== 'undefined') {
+        // ugly build hack
+        return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      } else {
+        return false;
+      }
+    }();
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
     this.getPicByIndex = this.getPicByIndex.bind(this);
@@ -120,9 +129,6 @@ export default class PhotosWidget extends Component {
       console.error('Photos index non-existent', itemIndex, photos);
       return this.selectRandomPic(photos);
     }
-    if (this.excludeVideos && photo.mediaMetadata.video) {
-      return this.selectRandomPic(photos);
-    }
 
     this.fetchPicture(photo.id);
   }
@@ -147,20 +153,8 @@ export default class PhotosWidget extends Component {
     return this.state.selectedAlbumPhotos[this.state.randomPicIndex];
   }
 
-  isIOS() {
-    // iOS does not play Google Photos mp4
-    if (typeof window !== 'undefined') {
-      // ugly build hack
-      return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    } else {
-      return false;
-    }
-  }
-
   // gets called when this route is navigated to
   componentDidMount() {
-    this.excludeVideos = this.isIOS();
     this.getFromStorage();
     if (this.props.signedIn) {
       this.listAlbums();
@@ -238,7 +232,7 @@ export default class PhotosWidget extends Component {
         </div>
 
         <div class={!this.state.selectedAlbum.id ? style.hide : ''}>
-          <PhotosWidgetPhotos photo={this.state.randomPic}></PhotosWidgetPhotos>
+          <PhotosWidgetPhotos photo={this.state.randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
         </div>
         <div class={!this.state.selectedAlbum.id ? style.hide : style.selectOther}>
           <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
@@ -260,21 +254,30 @@ export class PhotosWidgetAlbum extends Component {
 }
 
 export class PhotosWidgetPhotos extends Component {
-  render({photo}) {
+  render({photo, isIOS}) {
     let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
     let videoUrl ='';
     let imgUrl = photo.baseUrl + suffix;
     if (photo.mediaMetadata.video) {
       videoUrl = photo.baseUrl + '=dv';
     }
-
     let bg = `background-image: url(${imgUrl})`;
-    // console.log('photos render', imgUrl, bg);
+
     return (
       <div class={style.photo} style={bg}>
-        { videoUrl ? (<PhotosWidgetVideo src={videoUrl} img={imgUrl} />) : ''}
+        { isIOS && videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
+
+        { videoUrl && !isIOS ? (<PhotosWidgetVideo src={videoUrl} img={imgUrl} />) : ''}
       </div>
     );
+  }
+}
+
+export class PhotosWidgetVideoLink extends Component {
+  render({link}) {
+    return (
+      <a href={link} target="_blank" class={style.extLink} title="Open in a new window"></a>
+    )
   }
 }
 
