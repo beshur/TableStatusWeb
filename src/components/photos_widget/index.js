@@ -8,7 +8,7 @@ import style from './style';
 // ShuSu
 const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 
-const ROTATION_INTERVAL = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL;
+const ROTATION_INTERVAL_MS = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
 
 const PHOTO_WIDTH = 1024;
 const PHOTO_HEIGHT = 512;
@@ -110,7 +110,7 @@ export default class PhotosWidget extends Component {
     clearInterval(this.timer);
 
     this.selectRandomPic(photos);
-    this.timer = setInterval(this.selectRandomPic.bind(this, photos), ROTATION_INTERVAL);
+    this.timer = setInterval(this.selectRandomPic.bind(this, photos), ROTATION_INTERVAL_MS);
   }
 
   selectRandomPicFromState() {
@@ -118,7 +118,6 @@ export default class PhotosWidget extends Component {
   }
 
   selectRandomPic(photos) {
-    console.log('selectRandomPic', photos);
     if (!photos.length) {
       return;
     }
@@ -141,7 +140,7 @@ export default class PhotosWidget extends Component {
       'mediaItemId': id
     }).then((response) => {
       let photo = response.result;
-      console.log('Photos fetchPicture', response.result);
+      // console.log('Photos fetchPicture', response.result);
 
       this.setState({ randomPic: photo });
       this.storage.setItem(STORE_ALBUM_SINGLE_PHOTO, JSON.stringify(photo));
@@ -164,8 +163,6 @@ export default class PhotosWidget extends Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.signedIn && this.props.signedIn) {
       this.listAlbums();
-
-      console.log('componentDidUpdate', this.state)
       if (this.state.selectedAlbum.id) {
         this.startRandomRotator(this.state.selectedAlbumPhotos);
       }
@@ -254,22 +251,101 @@ export class PhotosWidgetAlbum extends Component {
 }
 
 export class PhotosWidgetPhotos extends Component {
-  render({photo, isIOS}) {
-    let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
-    let videoUrl ='';
-    let imgUrl = photo.baseUrl + suffix;
-    if (photo.mediaMetadata.video) {
-      videoUrl = photo.baseUrl + '=dv';
+  state = {
+    A: {},
+    B: {},
+    current: 'B'
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState){
+    console.log('getDerivedStateFromProps', prevState);
+    if(nextProps.photo !== prevState.A && nextProps.photo !== prevState.B){
+      let change = {};
+      change[prevState.current] = nextProps.photo;
+      change.current = prevState.current === 'A' ? 'B' : 'A';
+
+      return change;
+    } else {
+      return null;
     }
-    let bg = `background-image: url(${imgUrl})`;
+  }
+
+  getNewPictureKey() {
+    // at this moment next is cocked for the next cycle
+    return this.state.current === 'A' ? 'B' : 'A';
+  }
+
+  getNextPhoto() {
+    return this.state[this.state.current];
+  }
+
+  getCurrentPhoto() {
+    return this.state[this.getNewPictureKey()];
+  }
+
+  prepareData(photo) {
+    let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
+    let result = {
+      imgUrl: photo.baseUrl + suffix,
+      productUrl: photo.productUrl,
+      videoUrl: null
+    }
+    if (photo.mediaMetadata && photo.mediaMetadata.video) {
+      result.videoUrl = photo.baseUrl + '=dv';
+    }
+    return result;
+  }
+
+  render({isIOS}) {
+
+    let oldImg = this.prepareData(this.getCurrentPhoto());
+    let newImg = this.prepareData(this.getNextPhoto());
+
+    console.log('PHOTOS', oldImg, newImg);
 
     return (
-      <div class={style.photo} style={bg}>
-        { isIOS && videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
-
-        { videoUrl && !isIOS ? (<PhotosWidgetVideo src={videoUrl} img={imgUrl} />) : ''}
+      <div class={style.container}>
+        <div class={style.photo_wrapper} data-old="true">
+          <PhotosWidgetPhotoItem photo={oldImg} newImg={newImg} isIOS={isIOS} />
+        </div>
       </div>
     );
+  }
+}
+
+export class PhotosWidgetPhotoItem extends Component {
+  state = {
+    loadedImgUrl: ''
+  }
+
+  onLoaded() {
+    // this.setState({
+    //   loaded: true
+    // });
+  }
+
+  render({photo, newImg, isIOS}, {loadedImgUrl}) {
+    let img = new Image();
+    img.src = newImg.imgUrl;
+    img.onload = () => {
+      this.setState({
+        loadedImgUrl: newImg.imgUrl
+      })
+    }
+
+    return (
+      <div class={style.photo} data-loaded="true">
+        { photo.imgUrl.length > 20 && !photo.videoUrl && (<img src={photo.imgUrl} onload={() => this.onLoaded()} />) }
+
+        <div class={style.photo}>
+          <img src={loadedImgUrl} />
+        </div>
+
+        { isIOS && photo.videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
+
+        { photo.videoUrl && !isIOS ? (<PhotosWidgetVideo src={photo.videoUrl} img={photo.imgUrl} />) : ''}
+      </div>
+    )
   }
 }
 
