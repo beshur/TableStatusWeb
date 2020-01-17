@@ -5,7 +5,8 @@ import Header from './header';
 
 // Code-splitting is automated for routes
 import Home from '../routes/home';
-import Profile from '../routes/profile';
+
+import BuildId from './build_id';
 
 export default class App extends Component {
 
@@ -46,9 +47,9 @@ export default class App extends Component {
 				<Header  />
 				<Router onChange={this.handleRoute}>
 					<Home path="/" googleApiLoaded={googleApiLoaded} />
-					<Profile path="/profile/" user="me" />
-					<Profile path="/profile/:user" />
 				</Router>
+
+				<BuildId />
 			</div>
 		);
 	}

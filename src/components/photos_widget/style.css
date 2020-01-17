@@ -2,6 +2,7 @@
   font-size: 18px;
   cursor: pointer;
   border-bottom: 1px dotted #ddd;
+  color: #62aadb;
 }
 
 .selected {
@@ -46,8 +47,13 @@
 .selectOther span {
   display: inline-block;
   margin: 5px 15px;
+  cursor: pointer;
 }
 
 .selectOther span:first-child {
   float: right;
+}
+
+.collapse_after ~ * {
+  display: none;
 }

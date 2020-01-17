@@ -2,17 +2,26 @@
  * localStorage wrapper
  */
 export default class UserStorage {
-  storage = window.localStorage;
-
   constructor(options) {
     this.prefix = options.prefix;
-  }
 
-  setItem(key, data) {
-    return this.storage.setItem(this.prefix + key, data);
+    if (typeof window !== 'undefined') {
+      // ugly build hack
+      this.engine = localStorage;
+    } else {
+      // mock
+      this.engine = {
+        getItem: () => undefined,
+        setItem: () => undefined
+      }
+    }
   }
 
   getItem(key) {
-    return this.storage.getItem(this.prefix + key);
+    return this.engine.getItem(this.prefix + key);
+  }
+
+  setItem(key, value) {
+    return this.engine.setItem(this.prefix + key, value);
   }
 }

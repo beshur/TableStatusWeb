@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import moment from 'moment';
 
+import CollapseWidget from '../collapse_widget';
 import style from './style';
 import { StorageMixin } from '../../lib/mixins';
 
@@ -11,15 +12,16 @@ const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 const API_INTERVAL = 1*60*60*1000;
 
 export default class CalendarWidget extends Component {
-  state = {
-    signedIn: false,
-    calendarId: '',
-    calendars: [],
-    events: []
-  }
-
   constructor(props) {
     super(props);
+    this.state = {
+      signedIn: false,
+      calendarId: '',
+      calendars: [],
+      events: [],
+      collapsed: false
+    }
+
     Object.assign(this, new StorageMixin('CalendarWidget'));
     this.timer = null;
   }
@@ -79,6 +81,8 @@ export default class CalendarWidget extends Component {
     if (this.props.signedIn) {
       this.listCalendars();
     }
+
+    this.timer = setInterval(() => this.listUpcomingEvents(), API_INTERVAL);
   }
 
   componentDidUpdate(prevProps) {
@@ -101,16 +105,26 @@ export default class CalendarWidget extends Component {
   render() {
     return (
       <div>
-        <h1>Сегодня</h1>
-        <div class={this.state.calendarId ? style.hide : '' }>
-          {
-            this.state.calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
-          }
-        </div>
-        <div class={!this.state.calendarId ? style.hide : '' }>
-          {
-            this.state.events.map((item) => <CalendarEvent item={item} /> )
-          }
+        <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
+        <div class={this.state.collapsed ? style.hide : null}>
+
+          <div class={this.state.calendarId ? style.hide : '' }>
+            {
+              this.state.calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
+            }
+          </div>
+
+          <div class={!this.state.calendarId ? style.hide : '' }>
+            <div class={style.events}>
+              {
+                this.state.events.map((item) => <CalendarItem item={item} /> )
+              }
+
+              <div class={this.state.events.length ? style.hide : null}>
+                Ничего не запланировано
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class={style.selectOther} onClick={() => this.selectOther()}>

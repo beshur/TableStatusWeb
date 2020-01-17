@@ -1,4 +1,6 @@
 import { h, Component } from 'preact';
+
+import UserStorage from '../../lib/user-storage';
 import style from './style';
 
 export default class NotesWidget extends Component {
@@ -6,15 +8,22 @@ export default class NotesWidget extends Component {
     text: ''
   };
 
+  constructor(props) {
+    super(props);
+    this.storage = new UserStorage({
+      prefix: 'STENGAZETA_NOTES'
+    });
+  }
+
   onChange(event) {
     let val = event.target.value;
     this.setState({text: val});
-    localStorage.setItem( this.props.storageKey, val );
+    this.storage.setItem( this.props.storageKey, val );
   }
 
   componentDidMount() {
     this.setState({
-      text: localStorage.getItem( this.props.storageKey ) || ''
+      text: this.storage.getItem( this.props.storageKey ) || ''
     });
   }
 

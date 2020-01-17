@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import style from './style';
 
+import ClockWidget from '../../components/clock_widget';
 import WeatherWidget from '../../components/weather_widget';
 import CalendarWidget from '../../components/calendar_widget';
 import NotesWidget from '../../components/notes_widget';
@@ -25,6 +26,7 @@ export default class Home extends Component {
   render({googleApiLoaded}, {signedIn}) {
     return (<div class={style.home}>
       <WeatherWidget />
+      <ClockWidget />
       <CalendarWidget signedIn={signedIn} />
       <PhotosWidget signedIn={signedIn} />
       <NotesWidget storageKey="STENGAZETA_NOTES" header="Заметки" />
