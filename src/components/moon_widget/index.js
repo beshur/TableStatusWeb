@@ -11,18 +11,31 @@ export default class MoonWidget extends Component {
     super(props);
     this.state = {
       age: 1,
-      phase: 0
+      phase: 0,
+      icon: 0
     }
     this.timer = null;
   }
 
   setPhase() {
-    const phase = lune.phase();
-    console.log('Moon', phase);
+    const moon = lune.phase();
+    const phase = Math.floor(moon.phase * 100);
+    const icon = this.phaseInBoundaries(phase);
+    console.log('Moon', moon);
     this.setState({
-      age: Math.floor(phase.age + 1),
-      phase: Math.floor(phase.phase * 100)
+      age: Math.floor(moon.age + 1),
+      phase,
+      icon
     });
+  }
+
+  phaseInBoundaries(phase) {
+    const step = 101/8;
+    const boundaries = [0, 1, 2, 3, 4, 5, 6, 7];
+    return boundaries.find((border => {
+      let normalisedBorder = border * step;
+      return normalisedBorder <= phase && (border + 1) * step > phase;
+    }));
   }
 
   componentDidMount() {
@@ -34,11 +47,11 @@ export default class MoonWidget extends Component {
     clearInterval(this.timer);
   }
 
-  render({}, {age, phase}) {
+  render({}, {age, phase, icon}) {
     return (
       <div class={style.container}>
+        <div class={style.icon} data-icon={icon}></div>
         <div class={style.head}>Луна</div>
-        <div class={style.icon}></div>
         <div class={style.text}>{age}-й день, фаза {phase}%</div>
       </div>
     )
