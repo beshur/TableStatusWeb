@@ -8,7 +8,7 @@ import style from './style';
 // ShuSu
 const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 
-const ROTATION_INTERVAL = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL;
+const ROTATION_INTERVAL = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
 
 const PHOTO_WIDTH = 1024;
 const PHOTO_HEIGHT = 512;
