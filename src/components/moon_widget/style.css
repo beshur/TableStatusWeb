@@ -1,0 +1,48 @@
+.container {
+  font-size: 24px;
+
+}
+
+.head {
+  margin: 0;
+  font-weight: bold;
+  color: #666;
+}
+
+.text {
+}
+
+.icon {
+  width: 60px;
+  height: 60px;
+  margin-right: 20px;
+  float: left;
+
+  background: transparent 50% 50% no-repeat;
+  background-size: contain;
+}
+
+.icon[data-icon="0"] {
+  background-image: url('/assets/moon/moon0.svg');
+}
+.icon[data-icon="1"] {
+  background-image: url('/assets/moon/moon1.svg');
+}
+.icon[data-icon="2"] {
+  background-image: url('/assets/moon/moon2.svg');
+}
+.icon[data-icon="3"] {
+  background-image: url('/assets/moon/moon3.svg');
+}
+.icon[data-icon="4"] {
+  background-image: url('/assets/moon/moon4.svg');
+}
+.icon[data-icon="5"] {
+  background-image: url('/assets/moon/moon5.svg');
+}
+.icon[data-icon="6"] {
+  background-image: url('/assets/moon/moon6.svg');
+}
+.icon[data-icon="7"] {
+  background-image: url('/assets/moon/moon7.svg');
+}

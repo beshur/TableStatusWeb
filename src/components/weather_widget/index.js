@@ -1,6 +1,8 @@
 import { h, Component } from 'preact';
 import style from './style';
 
+import MoonWidget from '../moon_widget';
+
 const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;
 const LOCATION = process.env.PREACT_APP_WEATHER_LOCATION;
@@ -69,8 +71,11 @@ export default class WeatherWidget extends Component {
             </div>
           </div>
           <div class={style.essential}>
-            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{data.main.feels_like}</span></div>
+            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{Math.round(data.main.feels_like)}</span></div>
             <div class={style.essential_humidity}>Влажность {data.main.humidity}%</div>
+          </div>
+          <div class={style.moon}>
+            <MoonWidget />
           </div>
         </div>
 

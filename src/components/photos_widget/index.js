@@ -1,17 +1,15 @@
-import { h, Component } from 'preact';
+import { h, Component, createRef } from 'preact';
 import moment from 'moment';
 
 import UserStorage from '../../lib/user-storage';
 import CollapseWidget from '../collapse_widget';
 import style from './style';
 
-// ShuSu
-const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 
-const ROTATION_INTERVAL = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
+const ROTATION_INTERVAL_MS = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
 
-const PHOTO_WIDTH = 1024;
-const PHOTO_HEIGHT = 512;
+const PHOTO_WIDTH = 1200;
+const PHOTO_HEIGHT = 800;
 
 const ALBUMS_LIMIT = 15;
 const PHOTOS_LIMIT = 100;
@@ -38,7 +36,16 @@ export default class PhotosWidget extends Component {
     this.storage = new UserStorage({
       prefix: 'STENGAZETA_PHOTOS'
     });
-    this.excludeVideos = false;
+    this.isIOS = function() {
+      // iOS does not play Google Photos mp4
+      if (typeof window !== 'undefined') {
+        // ugly build hack
+        return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      } else {
+        return false;
+      }
+    }();
 
     this.onAlbumSelected = this.onAlbumSelected.bind(this);
     this.getPicByIndex = this.getPicByIndex.bind(this);
@@ -100,7 +107,7 @@ export default class PhotosWidget extends Component {
     console.log('Photos startRandomRotator', ROTATION_INTERVAL);
     clearInterval(this.timer);
     this.selectRandomPic(photos);
-    this.timer = setInterval(this.selectRandomPic.bind(this, photos), ROTATION_INTERVAL);
+    this.timer = setInterval(this.selectRandomPic.bind(this, photos), ROTATION_INTERVAL_MS);
   }
 
   selectRandomPicFromState() {
@@ -108,7 +115,6 @@ export default class PhotosWidget extends Component {
   }
 
   selectRandomPic(photos) {
-    console.log('selectRandomPic', photos);
     if (!photos.length) {
       return;
     }
@@ -119,10 +125,6 @@ export default class PhotosWidget extends Component {
       console.error('Photos index non-existent', itemIndex, photos);
       return this.selectRandomPic(photos);
     }
-    // if (this.excludeVideos && photo.mediaMetadata.video) {
-    //   return this.selectRandomPic(photos);
-    // }
-
     this.fetchPicture(photo.id);
   }
 
@@ -134,7 +136,7 @@ export default class PhotosWidget extends Component {
       'mediaItemId': id
     }).then((response) => {
       let photo = response.result;
-      console.log('Photos fetchPicture', response.result);
+      // console.log('Photos fetchPicture', response.result);
 
       this.setState({ randomPic: photo });
       this.storage.setItem(STORE_ALBUM_SINGLE_PHOTO, JSON.stringify(photo));
@@ -146,20 +148,8 @@ export default class PhotosWidget extends Component {
     return this.state.selectedAlbumPhotos[this.state.randomPicIndex];
   }
 
-  isIOS() {
-    // iOS does not play Google Photos mp4
-    if (typeof window !== 'undefined') {
-      // ugly build hack
-      return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    } else {
-      return false;
-    }
-  }
-
   // gets called when this route is navigated to
   componentDidMount() {
-    this.excludeVideos = this.isIOS();
     this.getFromStorage();
     if (this.props.signedIn) {
       this.listAlbums();
@@ -169,8 +159,6 @@ export default class PhotosWidget extends Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.signedIn && this.props.signedIn) {
       this.listAlbums();
-
-      console.log('componentDidUpdate', this.state)
       if (this.state.selectedAlbum.id) {
         this.startRandomRotator(this.state.selectedAlbumPhotos);
       }
@@ -237,7 +225,7 @@ export default class PhotosWidget extends Component {
         </div>
 
         <div class={!this.state.selectedAlbum.id ? style.hide : ''}>
-          <PhotosWidgetPhotos photo={this.state.randomPic}></PhotosWidgetPhotos>
+          <PhotosWidgetPhotos photo={this.state.randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
         </div>
         <div class={!this.state.selectedAlbum.id ? style.hide : style.selectOther}>
           <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
@@ -259,28 +247,190 @@ export class PhotosWidgetAlbum extends Component {
 }
 
 export class PhotosWidgetPhotos extends Component {
-  render({photo}) {
-    let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
-    let videoUrl ='';
-    let imgUrl = photo.baseUrl + suffix;
-    if (photo.mediaMetadata.video) {
-      videoUrl = photo.baseUrl + '=dv';
-    }
+  state = {
+    A: {},
+    B: {},
+    current: 'B'
+  }
 
-    let bg = `background-image: url(${imgUrl})`;
-    // console.log('photos render', imgUrl, bg);
+  static getDerivedStateFromProps(nextProps, prevState){
+    console.log('getDerivedStateFromProps', prevState);
+    if(nextProps.photo !== prevState.A && nextProps.photo !== prevState.B){
+      let change = {};
+      change[prevState.current] = nextProps.photo;
+      change.current = prevState.current === 'A' ? 'B' : 'A';
+
+      return change;
+    } else {
+      return null;
+    }
+  }
+
+  getNewPictureKey() {
+    // at this moment next is cocked for the next cycle
+    return this.state.current === 'A' ? 'B' : 'A';
+  }
+
+  getNextPhoto() {
+    return this.state[this.state.current];
+  }
+
+  getCurrentPhoto() {
+    return this.state[this.getNewPictureKey()];
+  }
+
+  prepareData(photo) {
+    console.log('prepareData', photo);
+    let suffix = `=h${PHOTO_HEIGHT}`;
+    let result = {
+      imgUrl: photo.baseUrl + suffix,
+      productUrl: photo.productUrl,
+      videoUrl: null
+    }
+    if (photo.mediaMetadata && photo.mediaMetadata.video) {
+      result.videoUrl = photo.baseUrl + '=dv';
+    }
+    console.log('prepareData result', result);
+    return result;
+  }
+
+  render({photo, isIOS}) {
+
+    // let oldImg = this.prepareData(this.getCurrentPhoto());
+    // let newImg = this.prepareData(this.getNextPhoto());
+    const newImg = this.prepareData(photo);
+    console.log('PHOTOS', photo.baseUrl, newImg);
+
     return (
-      <div class={style.photo} style={bg}>
-        { videoUrl ? (<PhotosWidgetVideo src={videoUrl} img={imgUrl} />) : ''}
+      <div class={style.container}>
+        <div class={style.photo_wrapper} data-old="true">
+          { photo.baseUrl && (<PhotosWidgetPhotoItem photo={newImg} isIOS={isIOS} />) }
+        </div>
       </div>
     );
   }
 }
 
-export class PhotosWidgetVideo extends Component {
-  render({src, img}) {
+export class PhotosWidgetPhotoItem extends Component {
+  ref = createRef()
+  canvas = null
+  ctx = null
+  opacity = 0
+  loadedImg = null
+
+  onLoaded(img) {
+    console.log('Loaded img', img);
+    this.loadedImg = img;
+    this.opacity = 0;
+    this.fadeIn();
+  }
+
+  scaleToFit(img){
+    // get the scale
+    let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
+    // get the top left position of the image
+    let x = (this.canvas.width / 2) - (img.width / 2) * scale;
+    let y = (this.canvas.height / 2) - (img.height / 2) * scale;
+    let w = img.width * scale;
+    let h = img.height * scale;
+    this.ctx.drawImage(img, x, y, w, h);
+
+    return {
+      x,
+      y,
+      w,
+      h
+    }
+  }
+
+  scaleToFill(img){
+    // get the scale
+    let scale = Math.max(this.canvas.width / img.width, this.canvas.height / img.height);
+    // get the top left position of the image
+    let x = (this.canvas.width / 2) - (img.width / 2) * scale;
+    let y = (this.canvas.height / 2) - (img.height / 2) * scale;
+    this.ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+  }
+
+  draw() {
+    let img = this.loadedImg;
+    let params = this.scaleToFit(img);
+    // cover up sides
+    this.ctx.fillRect(0, 0, (this.canvas.width - params.w)/2, this.canvas.height);
+    this.ctx.fillRect(params.x + params.w, 0, (this.canvas.width - params.w)/2, this.canvas.height);
+  }
+
+  fadeIn() {
+    this.ctx.globalAlpha = this.opacity;
+    this.draw()
+
+    this.opacity += 0.01;
+    if (this.opacity < 1)
+      global.requestAnimationFrame(() => this.fadeIn());
+    else
+      this.isBusy = false;
+  }
+
+  componentDidMount() {
+    if (this.ref.current) {
+      this.canvas = this.ref.current;
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.fillStyle = '#fff';
+    }
+  }
+
+  render({photo, newImg, isIOS}, {loadedImgUrl}) {
+    let img = new global.Image();
+    // img.crossOrigin = "Anonymous";
+    img.onload = this.onLoaded.bind(this, img);
+    img.src = photo.imgUrl;
+
     return (
-      <video controls="true" type="video/mp4" src={src} poster={img} preload="none" class={style.video} />
+      <div class={style.photo}>
+        { isIOS && photo.videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
+
+        { photo.videoUrl && !isIOS ? (<PhotosWidgetVideo src={photo.videoUrl} img={photo.imgUrl} />) : ''}
+
+        <canvas ref={this.ref} width={PHOTO_WIDTH} height={PHOTO_HEIGHT} class={style.canvas} />
+      </div>
+    )
+  }
+}
+
+export class PhotosWidgetVideoLink extends Component {
+  render({link}) {
+    return (
+      <a href={link} target="_blank" class={style.extLink} title="Open in a new window"></a>
+    )
+  }
+}
+
+export class PhotosWidgetVideo extends Component {
+  state = {
+    clicked: false,
+    src: ''
+  }
+
+  onClick() {
+    this.setState({clicked: true});
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.src != prevState.src) {
+      return {
+        clicked: false,
+        src: nextProps.src
+      }
+    } else {
+      return null;
+    }
+  }
+
+  render({src, img}, {clicked}) {
+    return (
+      <div class={style.video_overlay} onClick={() => this.onClick()}>
+        <video controls="true" type="video/mp4" src={src} poster={img} data-visible={clicked}  preload="none" class={style.video} />
+      </div>
     );
   }
 }
