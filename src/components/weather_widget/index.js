@@ -71,7 +71,7 @@ export default class WeatherWidget extends Component {
             </div>
           </div>
           <div class={style.essential}>
-            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{data.main.feels_like}</span></div>
+            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{Math.round(data.main.feels_like)}</span></div>
             <div class={style.essential_humidity}>Влажность {data.main.humidity}%</div>
           </div>
           <div class={style.moon}>
