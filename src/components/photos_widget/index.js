@@ -1,17 +1,15 @@
-import { h, Component } from 'preact';
+import { h, Component, createRef } from 'preact';
 import moment from 'moment';
 
 import UserStorage from '../../lib/UserStorage';
 import CollapseWidget from '../collapse_widget';
 import style from './style';
 
-// ShuSu
-const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 
 const ROTATION_INTERVAL_MS = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
 
-const PHOTO_WIDTH = 1024;
-const PHOTO_HEIGHT = 512;
+const PHOTO_WIDTH = 1200;
+const PHOTO_HEIGHT = 800;
 
 const ALBUMS_LIMIT = 15;
 const PHOTOS_LIMIT = 100;
@@ -284,7 +282,8 @@ export class PhotosWidgetPhotos extends Component {
   }
 
   prepareData(photo) {
-    let suffix = `=w${PHOTO_WIDTH}-h${PHOTO_HEIGHT}`;
+    console.log('prepareData', photo);
+    let suffix = `=h${PHOTO_HEIGHT}`;
     let result = {
       imgUrl: photo.baseUrl + suffix,
       productUrl: photo.productUrl,
@@ -293,20 +292,21 @@ export class PhotosWidgetPhotos extends Component {
     if (photo.mediaMetadata && photo.mediaMetadata.video) {
       result.videoUrl = photo.baseUrl + '=dv';
     }
+    console.log('prepareData result', result);
     return result;
   }
 
-  render({isIOS}) {
+  render({photo, isIOS}) {
 
-    let oldImg = this.prepareData(this.getCurrentPhoto());
-    let newImg = this.prepareData(this.getNextPhoto());
-
-    console.log('PHOTOS', oldImg, newImg);
+    // let oldImg = this.prepareData(this.getCurrentPhoto());
+    // let newImg = this.prepareData(this.getNextPhoto());
+    const newImg = this.prepareData(photo);
+    console.log('PHOTOS', photo.baseUrl, newImg);
 
     return (
       <div class={style.container}>
         <div class={style.photo_wrapper} data-old="true">
-          <PhotosWidgetPhotoItem photo={oldImg} newImg={newImg} isIOS={isIOS} />
+          { photo.baseUrl && (<PhotosWidgetPhotoItem photo={newImg} isIOS={isIOS} />) }
         </div>
       </div>
     );
@@ -314,32 +314,84 @@ export class PhotosWidgetPhotos extends Component {
 }
 
 export class PhotosWidgetPhotoItem extends Component {
-  state = {
-    loadedImgUrl: ''
+  ref = createRef()
+  canvas = null
+  ctx = null
+  opacity = 0
+  loadedImg = null
+
+  onLoaded(img) {
+    console.log('Loaded img', img);
+    this.loadedImg = img;
+    this.opacity = 0;
+    this.fadeIn();
   }
 
-  onLoaded() {
-    // this.setState({
-    //   loaded: true
-    // });
+  scaleToFit(img){
+    // get the scale
+    let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
+    // get the top left position of the image
+    let x = (this.canvas.width / 2) - (img.width / 2) * scale;
+    let y = (this.canvas.height / 2) - (img.height / 2) * scale;
+    let w = img.width * scale;
+    let h = img.height * scale;
+    this.ctx.drawImage(img, x, y, w, h);
+
+    return {
+      x,
+      y,
+      w,
+      h
+    }
+  }
+
+  scaleToFill(img){
+    // get the scale
+    let scale = Math.max(this.canvas.width / img.width, this.canvas.height / img.height);
+    // get the top left position of the image
+    let x = (this.canvas.width / 2) - (img.width / 2) * scale;
+    let y = (this.canvas.height / 2) - (img.height / 2) * scale;
+    this.ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+  }
+
+  draw() {
+    let img = this.loadedImg;
+    let params = this.scaleToFit(img);
+    // cover up sides
+    this.ctx.fillRect(0, 0, (this.canvas.width - params.w)/2, this.canvas.height);
+    this.ctx.fillRect(params.x + params.w, 0, (this.canvas.width - params.w)/2, this.canvas.height);
+  }
+
+  fadeIn() {
+    console.log('fadeIn 1', this.opacity)
+    this.ctx.globalAlpha = this.opacity;
+    this.draw()
+
+    this.opacity += 0.005;
+    if (this.opacity < 1)
+      global.requestAnimationFrame(() => this.fadeIn());
+    else
+      this.isBusy = false;
+  }
+
+  componentDidMount() {
+    if (this.ref.current) {
+      this.canvas = this.ref.current;
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.fillStyle = '#fff';
+    }
   }
 
   render({photo, newImg, isIOS}, {loadedImgUrl}) {
-    let img = new Image();
-    img.src = newImg.imgUrl;
-    img.onload = () => {
-      this.setState({
-        loadedImgUrl: newImg.imgUrl
-      })
-    }
+    let img = new global.Image();
+    // img.crossOrigin = "Anonymous";
+    img.onload = this.onLoaded.bind(this, img);
+    img.src = photo.imgUrl;
 
     return (
-      <div class={style.photo} data-loaded="true">
-        { photo.imgUrl.length > 20 && !photo.videoUrl && (<img src={photo.imgUrl} onload={() => this.onLoaded()} />) }
+      <div class={style.photo}>
 
-        <div class={style.photo}>
-          <img src={loadedImgUrl} />
-        </div>
+        <canvas ref={this.ref} width={PHOTO_WIDTH} height={PHOTO_HEIGHT} class={style.photo} />
 
         { isIOS && photo.videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
 
