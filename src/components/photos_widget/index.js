@@ -363,11 +363,10 @@ export class PhotosWidgetPhotoItem extends Component {
   }
 
   fadeIn() {
-    console.log('fadeIn 1', this.opacity)
     this.ctx.globalAlpha = this.opacity;
     this.draw()
 
-    this.opacity += 0.005;
+    this.opacity += 0.01;
     if (this.opacity < 1)
       global.requestAnimationFrame(() => this.fadeIn());
     else
@@ -390,12 +389,11 @@ export class PhotosWidgetPhotoItem extends Component {
 
     return (
       <div class={style.photo}>
-
-        <canvas ref={this.ref} width={PHOTO_WIDTH} height={PHOTO_HEIGHT} class={style.photo} />
-
         { isIOS && photo.videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
 
         { photo.videoUrl && !isIOS ? (<PhotosWidgetVideo src={photo.videoUrl} img={photo.imgUrl} />) : ''}
+
+        <canvas ref={this.ref} width={PHOTO_WIDTH} height={PHOTO_HEIGHT} class={style.canvas} />
       </div>
     )
   }
@@ -410,9 +408,31 @@ export class PhotosWidgetVideoLink extends Component {
 }
 
 export class PhotosWidgetVideo extends Component {
-  render({src, img}) {
+  state = {
+    clicked: false,
+    src: ''
+  }
+
+  onClick() {
+    this.setState({clicked: true});
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.src != prevState.src) {
+      return {
+        clicked: false,
+        src: nextProps.src
+      }
+    } else {
+      return null;
+    }
+  }
+
+  render({src, img}, {clicked}) {
     return (
-      <video controls="true" type="video/mp4" src={src} poster={img} preload="none" class={style.video} />
+      <div class={style.video_overlay} onClick={() => this.onClick()}>
+        <video controls="true" type="video/mp4" src={src} poster={img} data-visible={clicked}  preload="none" class={style.video} />
+      </div>
     );
   }
 }
