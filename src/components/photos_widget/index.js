@@ -1,10 +1,9 @@
 import { h, Component, createRef } from 'preact';
-import moment from 'moment';
+import moment from 'moment/moment';
 
 import UserStorage from '../../lib/UserStorage';
 import CollapseWidget from '../collapse_widget';
 import style from './style';
-
 
 const ROTATION_INTERVAL_MS = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
 
@@ -276,7 +275,6 @@ export class PhotosWidgetPhotos extends Component {
           { newImg.videoUrl && !isIOS ? (<PhotosWidgetVideo src={newImg.videoUrl} img={newImg.imgUrl} />) : ''}
 
           { newImg.imgUrl && (<PhotosWidgetPhotoItem photo={newImg} isIOS={isIOS} />) }
-
         </div>
       </div>
     );
@@ -366,8 +364,12 @@ export class PhotosWidgetPhotoItem extends Component {
   }
 
   render({photo, newImg, isIOS}, {loadedImgUrl}) {
-    let img = new global.Image();
-    // img.crossOrigin = "Anonymous";
+    let img;
+    if (typeof window !== 'undefined') {
+      img = new Image();
+    } else {
+      img = {};
+    }
     img.onload = this.onLoaded.bind(this, img);
     img.src = photo.imgUrl;
 
