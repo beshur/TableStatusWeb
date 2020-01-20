@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import moment from 'moment';
+import moment from 'moment/moment';
 
 import style from './style';
 
