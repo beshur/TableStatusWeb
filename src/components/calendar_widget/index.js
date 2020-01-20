@@ -8,8 +8,8 @@ import { StorageMixin } from '../../lib/mixins';
 // ShuSu
 const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
 
-// 2 hours
-const API_INTERVAL = 1*60*60*1000;
+// 1 hour
+const API_INTERVAL = 60*60*1000;
 
 export default class CalendarWidget extends Component {
   constructor(props) {
@@ -70,27 +70,32 @@ export default class CalendarWidget extends Component {
       calendarId: calendar.id
     });
 
-    this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
+    this.startTimer();
+  }
+
+  componentDidMount() {
+    this.loadState(['calendarId'], () => {
+      this.props.signedIn && this.onSignedIn();
+    });
+  }
+
+  startTimer() {
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.listUpcomingEvents(), API_INTERVAL);
     setTimeout(() => this.listUpcomingEvents(), 0);
   }
 
-  // gets called when this route is navigated to
-  componentDidMount() {
-    this.loadState(['calendarId']);
-
-    if (this.props.signedIn) {
+  onSignedIn() {
+    if (this.state.calendarId) {
+      this.startTimer();
+    } else {
       this.listCalendars();
     }
-
-    this.timer = setInterval(() => this.listUpcomingEvents(), API_INTERVAL);
   }
 
   componentDidUpdate(prevProps) {
     if (!prevProps.signedIn && this.props.signedIn) {
-      this.listCalendars();
-    }
-    if (this.state.calendarId) {
-      this.timer = setInterval(this.listUpcomingEvents, API_INTERVAL);
+      this.onSignedIn();
     }
   }
 
@@ -99,7 +104,7 @@ export default class CalendarWidget extends Component {
   }
 
   selectOther() {
-    this.setState({calendarId: null});
+    this.saveState({calendarId: null}, () => this.listCalendars());
   }
 
   render() {
@@ -117,7 +122,7 @@ export default class CalendarWidget extends Component {
           <div class={!this.state.calendarId ? style.hide : '' }>
             <div class={style.events}>
               {
-                this.state.events.map((item) => <CalendarItem item={item} /> )
+                this.state.events.map((item) => <CalendarEvent item={item} /> )
               }
 
               <div class={this.state.events.length ? style.hide : null}>
@@ -166,6 +171,7 @@ export class CalendarEvent extends Component {
   }
 
   render( {item} ) {
+    console.log('CalendarEvent', item);
     return (
       <div class={this.getClass()}>
         {this.formatDate(item.start.dateTime)}{item.summary}

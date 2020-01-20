@@ -7,21 +7,21 @@ import UserStorage from './user-storage';
 export function StorageMixin(prefix) {
   return {
     storage: new UserStorage({prefix}),
-    saveState: function(data) {
-      this.setState(data);
+    saveState: function(data, cb) {
+      this.setState(data, cb);
 
       for (const prop in data) {
         this.storage.setItem(prop, data[prop]);
       }
     },
-    loadState: function(keys) {
+    loadState: function(keys, cb) {
       const loaded = {};
       keys.map(key => {
         loaded[key] = this.storage.getItem(key);
         return key;
       });
       console.log('Storage loadState', loaded);
-      this.setState(loaded);
+      this.setState(loaded, cb);
     }
   }
 }

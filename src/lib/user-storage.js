@@ -18,10 +18,20 @@ export default class UserStorage {
   }
 
   getItem(key) {
-    return this.engine.getItem(this.prefix + key);
+    let raw = this.engine.getItem(this.prefix + key);
+    let result = null;
+
+    try {
+      result = JSON.parse(raw);
+    } catch(err) {
+      console.log('UserStorage', this.prefix, key, err);
+      result = raw;
+    }
+
+    return result;
   }
 
   setItem(key, value) {
-    return this.engine.setItem(this.prefix + key, value);
+    return this.engine.setItem(this.prefix + key, JSON.stringify(value));
   }
 }

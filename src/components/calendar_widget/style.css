@@ -4,6 +4,7 @@
   padding: 15px 20px;
   font-size: 20px;
   background: rgba(80, 150, 255, 0.05);
+  border-radius: 8px;
 }
 
 .calendarItem {
