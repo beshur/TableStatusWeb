@@ -183,27 +183,32 @@ export default class PhotosWidget extends Component {
     return this.state.selectedAlbum && this.state.selectedAlbum.id;
   }
 
-  render() {
+  render({signedIn}, {}) {
     return (
       <div class={this.isSelectedAlbumHasId() ? 'selected' : ''}>
-        <h1 class={this.state.collapsed ? style.collapse_after : null}>
+        <h1>
           {this.state.selectedAlbum && this.state.selectedAlbum.title ? this.state.selectedAlbum.title : 'Фото'}
            <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} />
         </h1>
-        <div class={this.isSelectedAlbumHasId() ? style.hide : ''}>
-          <p>Выберите альбомы для слайдшоу:</p>
-          { !this.state.albums.length ? (<LoadingPart noText="true" />) : '' }
-          {
-            this.state.albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
-          }
-        </div>
 
-        <div class={!this.isSelectedAlbumHasId() ? style.hide : ''}>
-          <PhotosWidgetPhotos photo={this.state.randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
-        </div>
-        <div class={!this.isSelectedAlbumHasId() ? style.hide : style.selectOther}>
-          <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
-          <span onClick={() => this.selectRandomPicFromState()}>Следующая фотография</span>
+        { !signedIn ? (<div>Сначала надо залогиниться</div>) : '' }
+
+        <div class={!signedIn || this.state.collapsed ? style.hide : null}>
+          <div class={this.isSelectedAlbumHasId() ? style.hide : ''}>
+            <p>Выберите альбомы для слайдшоу:</p>
+            { !this.state.albums.length ? (<LoadingPart noText="true" />) : '' }
+            {
+              this.state.albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
+            }
+          </div>
+
+          <div class={!this.isSelectedAlbumHasId() ? style.hide : ''}>
+            <PhotosWidgetPhotos photo={this.state.randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
+          </div>
+          <div class={!this.isSelectedAlbumHasId() ? style.hide : style.selectOther}>
+            <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
+            <span onClick={() => this.selectRandomPicFromState()}>Следующая фотография</span>
+          </div>
         </div>
       </div>
     );

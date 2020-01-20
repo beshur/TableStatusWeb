@@ -119,11 +119,14 @@ export default class CalendarWidget extends Component {
     }, () => this.listCalendars());
   }
 
-  render({}, {calendars, events, loadingEvents}) {
+  render({signedIn}, {calendars, events, loadingEvents}) {
     return (
       <div>
         <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
-        <div class={this.state.collapsed ? style.hide : null}>
+
+        { !signedIn ? (<div>Сначала надо залогиниться</div>) : '' }
+
+        <div class={!signedIn || this.state.collapsed ? style.hide : null}>
 
           <div class={this.state.calendarId ? style.hide : '' }>
             { !calendars.length ? (<LoadingPart noText="true" />) : '' }
