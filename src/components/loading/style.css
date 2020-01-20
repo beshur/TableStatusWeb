@@ -1,0 +1,10 @@
+.loading {
+  padding: 45px 0 10px;
+  background: transparent url(http://localhost:8080/assets/ajax-loader.gif) 50% 10px no-repeat;
+  text-align: center;
+}
+
+.loading[data-no-text="true"] {
+  text-indent: -9999px;
+  font-size: 0;
+}

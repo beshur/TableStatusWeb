@@ -1,8 +1,9 @@
 import { h, Component, createRef } from 'preact';
 import moment from 'moment/moment';
 
-import UserStorage from '../../lib/user-storage';
+import { StorageMixin } from '../../lib/mixins';
 import CollapseWidget from '../collapse_widget';
+import LoadingPart from '../loading';
 import style from './style';
 
 const ROTATION_INTERVAL_MS = process.env.PREACT_APP_PHOTOS_ROTATION_INTERVAL_MS;
@@ -13,28 +14,24 @@ const PHOTO_HEIGHT = 800;
 const ALBUMS_LIMIT = 15;
 const PHOTOS_LIMIT = 100;
 
-const STORE_ALBUM_KEY = 'ALBUM';
-const STORE_ALBUM_PHOTOS = 'PHOTOS';
-const STORE_ALBUM_SINGLE_PHOTO = 'PHOTO';
-
-
 export default class PhotosWidget extends Component {
+  timer = null
+  state = {
+    albums: [],
+    selectedAlbum: {},
+    selectedAlbumPhotos: [],
+    randomPic: {
+      mediaMetadata: {}
+    },
+    randomPicIndex: null,
+    collapsed: false
+  }
+  isIOS = null
+
   constructor(props) {
     super(props);
-    this.state = {
-      albums: [],
-      selectedAlbum: {},
-      selectedAlbumPhotos: [],
-      randomPic: {
-        mediaMetadata: {}
-      },
-      randomPicIndex: null,
-      collapsed: false
-    }
+    Object.assign(this, new StorageMixin('StengazetaPhotos'));
 
-    this.storage = new UserStorage({
-      prefix: 'STENGAZETA_PHOTOS'
-    });
     this.isIOS = function() {
       // iOS does not play Google Photos mp4
       if (typeof window !== 'undefined') {
@@ -45,10 +42,6 @@ export default class PhotosWidget extends Component {
         return false;
       }
     }();
-
-    this.onAlbumSelected = this.onAlbumSelected.bind(this);
-    this.getPicByIndex = this.getPicByIndex.bind(this);
-    this.timer = null;
   }
 
   listAlbums() {
@@ -95,17 +88,14 @@ export default class PhotosWidget extends Component {
     }).then((response) => {
       let photos = response.result.mediaItems;
       console.log('Photos', photos);
-      this.setState({selectedAlbumPhotos: photos});
-      this.startRandomRotator(photos);
-
-      this.storage.setItem(STORE_ALBUM_PHOTOS, JSON.stringify(photos));
+      this.saveState({selectedAlbumPhotos: photos}, () => this.startRandomRotator());
     });
   }
 
-  startRandomRotator(photos) {
+  startRandomRotator() {
     clearInterval(this.timer);
-    this.selectRandomPic(photos);
-    this.timer = setInterval(this.selectRandomPic.bind(this, photos), ROTATION_INTERVAL_MS);
+    this.selectRandomPicFromState();
+    this.timer = setInterval(() => this.selectRandomPicFromState(), ROTATION_INTERVAL_MS);
   }
 
   selectRandomPicFromState() {
@@ -135,31 +125,30 @@ export default class PhotosWidget extends Component {
     }).then((response) => {
       let photo = response.result;
       // console.log('Photos fetchPicture', response.result);
-
       this.setState({ randomPic: photo });
-      this.storage.setItem(STORE_ALBUM_SINGLE_PHOTO, JSON.stringify(photo));
     });
 
   }
 
-  getPicByIndex() {
-    return this.state.selectedAlbumPhotos[this.state.randomPicIndex];
-  }
-
-  // gets called when this route is navigated to
   componentDidMount() {
     this.getFromStorage();
-    if (this.props.signedIn) {
-      this.listAlbums();
-    }
   }
 
   componentDidUpdate(prevProps) {
     if (!prevProps.signedIn && this.props.signedIn) {
-      this.listAlbums();
-      if (this.state.selectedAlbum.id) {
-        this.startRandomRotator(this.state.selectedAlbumPhotos);
+      this.onSignedIn();
+    }
+  }
+
+  onSignedIn() {
+    if (this.state.selectedAlbum && this.state.selectedAlbum.id) {
+      if (this.state.selectedAlbumPhotos.length) {
+        this.startRandomRotator();
+      } else {
+        this.listPhotosOfAlbum();
       }
+    } else {
+      this.listAlbums();
     }
   }
 
@@ -169,63 +158,50 @@ export default class PhotosWidget extends Component {
 
   onAlbumSelected(album) {
     console.log('onAlbumSelected', album);
-    this.setState({selectedAlbum: album});
-
-    this.storage.setItem(STORE_ALBUM_KEY, JSON.stringify(album));
-    setTimeout(this.listPhotosOfAlbum.bind(this), 0);
+    this.saveState({selectedAlbum: album}, () => this.listPhotosOfAlbum());
   }
 
   selectOther() {
-    this.setState({selectedAlbum: {}});
-    this.storage.setItem(STORE_ALBUM_KEY, null);
+    this.saveState({selectedAlbum: {}});
+    if (!this.state.albums.length) {
+      this.listAlbums();
+    }
     clearInterval(this.timer);
   }
 
   getFromStorage() {
-    const album = this.storage.getItem(STORE_ALBUM_KEY);
-    const photos = this.storage.getItem(STORE_ALBUM_PHOTOS);
-    let albumObj = {};
-    let photosObj = [];
-
-    try {
-      albumObj = JSON.parse(album);
-      photosObj = JSON.parse(photos);
-    } catch(err) {
-      console.error('Photos, restoring from storage failed', err);
-      return false;
-    }
-
-    console.log('Photos, restored', albumObj, photosObj);
-    if (albumObj === null || photosObj === null) {
-      return false;
-    }
-    this.setState({
-      selectedAlbum: albumObj,
-      selectedAlbumPhotos: photosObj
+    this.loadState(['selectedAlbum', 'selectedAlbumPhotos'], () => {
+      if (this.props.signedIn) {
+        this.onSignedIn();
+      }
     });
-    this.startRandomRotator(photosObj);
 
     return true;
   }
 
+  isSelectedAlbumHasId() {
+    return this.state.selectedAlbum && this.state.selectedAlbum.id;
+  }
+
   render() {
     return (
-      <div class={this.state.selectedAlbum.id ? 'selected' : ''}>
+      <div class={this.isSelectedAlbumHasId() ? 'selected' : ''}>
         <h1 class={this.state.collapsed ? style.collapse_after : null}>
-          {this.state.selectedAlbum.title ? this.state.selectedAlbum.title : 'Фото'}
+          {this.state.selectedAlbum && this.state.selectedAlbum.title ? this.state.selectedAlbum.title : 'Фото'}
            <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} />
         </h1>
-        <div class={this.state.selectedAlbum.id ? style.hide : ''}>
+        <div class={this.isSelectedAlbumHasId() ? style.hide : ''}>
           <p>Выберите альбомы для слайдшоу:</p>
+          { !this.state.albums.length ? (<LoadingPart noText="true" />) : '' }
           {
             this.state.albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
           }
         </div>
 
-        <div class={!this.state.selectedAlbum.id ? style.hide : ''}>
+        <div class={!this.isSelectedAlbumHasId() ? style.hide : ''}>
           <PhotosWidgetPhotos photo={this.state.randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
         </div>
-        <div class={!this.state.selectedAlbum.id ? style.hide : style.selectOther}>
+        <div class={!this.isSelectedAlbumHasId() ? style.hide : style.selectOther}>
           <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
           <span onClick={() => this.selectRandomPicFromState()}>Следующая фотография</span>
         </div>

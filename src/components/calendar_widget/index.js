@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import moment from 'moment/moment';
 
 import CollapseWidget from '../collapse_widget';
+import LoadingPart from '../loading';
 import style from './style';
 import { StorageMixin } from '../../lib/mixins';
 
@@ -19,7 +20,8 @@ export default class CalendarWidget extends Component {
       calendarId: '',
       calendars: [],
       events: [],
-      collapsed: false
+      collapsed: false,
+      loadingEvents: true
     }
 
     Object.assign(this, new StorageMixin('CalendarWidget'));
@@ -44,6 +46,11 @@ export default class CalendarWidget extends Component {
     }
     const today = moment(moment().format('MMMM D YYYY')).toISOString();
     const tomorrow = moment(moment().add(1, 'day').format('MMMM D YYYY')).toISOString();
+
+    this.setState({
+      loadingEvents: true
+    });
+
     gapi.client.calendar.events.list({
       'calendarId': this.state.calendarId,
       'timeMin': today,
@@ -54,7 +61,10 @@ export default class CalendarWidget extends Component {
       'orderBy': 'startTime'
     }).then((response) => {
       let events = response.result.items;
-      this.setState({events});
+      this.setState({
+        events,
+        loadingEvents: false
+      });
     });
   }
 
@@ -104,28 +114,33 @@ export default class CalendarWidget extends Component {
   }
 
   selectOther() {
-    this.saveState({calendarId: null}, () => this.listCalendars());
+    this.saveState({
+      calendarId: null
+    }, () => this.listCalendars());
   }
 
-  render() {
+  render({}, {calendars, events, loadingEvents}) {
     return (
       <div>
         <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
         <div class={this.state.collapsed ? style.hide : null}>
 
           <div class={this.state.calendarId ? style.hide : '' }>
+            { !calendars.length ? (<LoadingPart noText="true" />) : '' }
             {
-              this.state.calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
+              calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
             }
           </div>
 
           <div class={!this.state.calendarId ? style.hide : '' }>
             <div class={style.events}>
               {
-                this.state.events.map((item) => <CalendarEvent item={item} /> )
+                events.map((item) => <CalendarEvent item={item} /> )
               }
 
-              <div class={this.state.events.length ? style.hide : null}>
+              { loadingEvents ? (<LoadingPart noText="true" />) : '' }
+
+              <div class={loadingEvents || (!loadingEvents && events.length) ? style.hide : null}>
                 Ничего не запланировано
               </div>
             </div>
