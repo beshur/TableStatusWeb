@@ -249,38 +249,6 @@ export class PhotosWidgetAlbum extends Component {
 }
 
 export class PhotosWidgetPhotos extends Component {
-  state = {
-    A: {},
-    B: {},
-    current: 'B'
-  }
-
-  static getDerivedStateFromProps(nextProps, prevState){
-    console.log('getDerivedStateFromProps', prevState);
-    if(nextProps.photo !== prevState.A && nextProps.photo !== prevState.B){
-      let change = {};
-      change[prevState.current] = nextProps.photo;
-      change.current = prevState.current === 'A' ? 'B' : 'A';
-
-      return change;
-    } else {
-      return null;
-    }
-  }
-
-  getNewPictureKey() {
-    // at this moment next is cocked for the next cycle
-    return this.state.current === 'A' ? 'B' : 'A';
-  }
-
-  getNextPhoto() {
-    return this.state[this.state.current];
-  }
-
-  getCurrentPhoto() {
-    return this.state[this.getNewPictureKey()];
-  }
-
   prepareData(photo) {
     console.log('prepareData', photo);
     let suffix = `=h${PHOTO_HEIGHT}`;
@@ -297,16 +265,18 @@ export class PhotosWidgetPhotos extends Component {
   }
 
   render({photo, isIOS}) {
-
-    // let oldImg = this.prepareData(this.getCurrentPhoto());
-    // let newImg = this.prepareData(this.getNextPhoto());
     const newImg = this.prepareData(photo);
-    console.log('PHOTOS', photo.baseUrl, newImg);
+    console.log('PhotosWidgetPhotos render', newImg.imgUrl, newImg);
 
     return (
       <div class={style.container}>
-        <div class={style.photo_wrapper} data-old="true">
-          { photo.baseUrl && (<PhotosWidgetPhotoItem photo={newImg} isIOS={isIOS} />) }
+        <div class={style.photo_wrapper}>
+          { isIOS && newImg.videoUrl && (<PhotosWidgetVideoLink link={newImg.productUrl} />) }
+
+          { newImg.videoUrl && !isIOS ? (<PhotosWidgetVideo src={newImg.videoUrl} img={newImg.imgUrl} />) : ''}
+
+          { newImg.imgUrl && (<PhotosWidgetPhotoItem photo={newImg} isIOS={isIOS} />) }
+
         </div>
       </div>
     );
@@ -351,12 +321,26 @@ export class PhotosWidgetPhotoItem extends Component {
     // get the top left position of the image
     let x = (this.canvas.width / 2) - (img.width / 2) * scale;
     let y = (this.canvas.height / 2) - (img.height / 2) * scale;
-    this.ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    let w = img.width * scale;
+    let h = img.height * scale;
+    this.ctx.drawImage(img, x, y, w, h);
+
+    return {
+      x,
+      y,
+      w,
+      h
+    }
   }
 
   draw() {
     let img = this.loadedImg;
-    let params = this.scaleToFit(img);
+    let params;
+    if (img.width >= img.height) {
+      params = this.scaleToFill(img);
+    } else {
+      params = this.scaleToFit(img);
+    }
     // cover up sides
     this.ctx.fillRect(0, 0, (this.canvas.width - params.w)/2, this.canvas.height);
     this.ctx.fillRect(params.x + params.w, 0, (this.canvas.width - params.w)/2, this.canvas.height);
@@ -389,10 +373,6 @@ export class PhotosWidgetPhotoItem extends Component {
 
     return (
       <div class={style.photo}>
-        { isIOS && photo.videoUrl && (<PhotosWidgetVideoLink link={photo.productUrl} />) }
-
-        { photo.videoUrl && !isIOS ? (<PhotosWidgetVideo src={photo.videoUrl} img={photo.imgUrl} />) : ''}
-
         <canvas ref={this.ref} width={PHOTO_WIDTH} height={PHOTO_HEIGHT} class={style.canvas} />
       </div>
     )
@@ -412,9 +392,11 @@ export class PhotosWidgetVideo extends Component {
     clicked: false,
     src: ''
   }
+  ref = createRef()
 
   onClick() {
     this.setState({clicked: true});
+    this.ref.current.play();
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -431,7 +413,7 @@ export class PhotosWidgetVideo extends Component {
   render({src, img}, {clicked}) {
     return (
       <div class={style.video_overlay} onClick={() => this.onClick()}>
-        <video controls="true" type="video/mp4" src={src} poster={img} data-visible={clicked}  preload="none" class={style.video} />
+        <video controls="true" type="video/mp4" ref={this.ref} src={src} poster={img} data-visible={clicked}  preload="none" class={style.video} />
       </div>
     );
   }
