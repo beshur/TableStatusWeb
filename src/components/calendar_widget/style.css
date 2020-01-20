@@ -19,6 +19,7 @@
 }
 
 .selectOther {
+  text-align: right;
   color: #666;
   font-size: 14px;
 }

@@ -104,7 +104,6 @@ export default class PhotosWidget extends Component {
   }
 
   startRandomRotator(photos) {
-    console.log('Photos startRandomRotator', ROTATION_INTERVAL);
     clearInterval(this.timer);
     this.selectRandomPic(photos);
     this.timer = setInterval(this.selectRandomPic.bind(this, photos), ROTATION_INTERVAL_MS);

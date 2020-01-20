@@ -20,6 +20,7 @@ export function StorageMixin(prefix) {
         loaded[key] = this.storage.getItem(key);
         return key;
       });
+      console.log('Storage loadState', loaded);
       this.setState(loaded);
     }
   }
