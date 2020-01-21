@@ -1,0 +1,10 @@
+.button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 0 20px;
+  color: #fff;
+  text-decoration: underline;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
