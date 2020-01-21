@@ -28,7 +28,7 @@ export default class AutoUpdate extends Component {
   onResult() {
     let newVersion = this.compareVersions();
     if (newVersion) {
-      console.log('AutoUpdate new version');
+      console.log('AutoUpdate new version', newVersion);
       this.setState({newVersion});
     } else {
       console.log('AutoUpdate old version');
@@ -41,11 +41,16 @@ export default class AutoUpdate extends Component {
     if (!element) {
       return null;
     }
-    return element.innerText;
+    let theAttr = element.attributes[this.attr];
+    if (!theAttr) {
+      return null;
+    }
+    return theAttr.value;
   }
 
   compareVersions() {
     let newVersion = this.getVersion();
+    console.log('AutoUpdate got version', newVersion);
     return newVersion && newVersion !== process.env.PREACT_APP_BUILD_ID;
   }
 
