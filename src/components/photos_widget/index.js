@@ -13,6 +13,7 @@ const PHOTO_HEIGHT = 800;
 
 const ALBUMS_LIMIT = 15;
 const PHOTOS_LIMIT = 100;
+const PHOTOS_MAX_LIMIT = 1200;
 
 export default class PhotosWidget extends Component {
   timer = null
@@ -83,14 +84,41 @@ export default class PhotosWidget extends Component {
       return;
     }
     gapi.client.photoslibrary.mediaItems.search({
-      'albumId': this.state.selectedAlbum.id,
-      'pageSize': PHOTOS_LIMIT
+      albumId: this.state.selectedAlbum.id,
+      pageSize: PHOTOS_LIMIT
     }).then((response) => {
       let photos = response.result.mediaItems;
       console.log('Photos', photos);
-      this.saveState({selectedAlbumPhotos: photos}, () => this.startRandomRotator());
+      this.saveState({selectedAlbumPhotos: photos}, () => {
+        this.startRandomRotator()
+        // debugger;
+        if (response.result.nextPageToken) {
+          this.listPhotosOfAlbumPage(response.result.nextPageToken);
+        }
+      });
     });
   }
+
+  listPhotosOfAlbumPage(pageToken) {
+    return gapi.client.photoslibrary.mediaItems.search({
+      albumId: this.state.selectedAlbum.id,
+      pageSize: PHOTOS_LIMIT,
+      pageToken
+    }).then(result => this.onPhotosOfAlbumResponse(result))
+      .catch(err => {
+        console.error('Photos err listPhotosOfAlbumPage', err);
+      });
+  }
+
+  onPhotosOfAlbumResponse(response) {
+    let photos = response.result.mediaItems;
+    console.log('onPhotosOfAlbumResponse', response);
+    this.saveState({selectedAlbumPhotos: this.state.selectedAlbumPhotos.concat(photos)});
+    if (response.result.nextPageToken && this.state.selectedAlbumPhotos.length < PHOTOS_MAX_LIMIT) {
+      this.listPhotosOfAlbumPage(response.result.nextPageToken);
+    }
+  }
+
 
   startRandomRotator() {
     clearInterval(this.timer);
@@ -104,6 +132,7 @@ export default class PhotosWidget extends Component {
 
   selectRandomPic(photos) {
     if (!photos.length) {
+      console.error('Photos empty', this.state.selectedAlbumPhotos);
       return;
     }
 
