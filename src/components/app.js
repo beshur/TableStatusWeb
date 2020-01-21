@@ -7,6 +7,7 @@ import Header from './header';
 import Home from '../routes/home';
 
 import BuildId from './build_id';
+import About from './about';
 
 export default class App extends Component {
 
@@ -49,7 +50,10 @@ export default class App extends Component {
 					<Home path="/" googleApiLoaded={googleApiLoaded} />
 				</Router>
 
-				<BuildId />
+				<div style="display: flex; text-align: center; justify-content: center;">
+					<BuildId />
+					<About />
+				</div>
 			</div>
 		);
 	}
