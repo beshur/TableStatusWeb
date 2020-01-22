@@ -1,7 +1,9 @@
 import { h, Component } from 'preact';
-import style from './style';
+import { useTranslation } from 'react-i18next';
 
+import style from './style';
 import MoonWidget from '../moon_widget';
+import i18n from '../i18n';
 
 const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;
@@ -15,7 +17,7 @@ export default class WeatherWidget extends Component {
     data: {
       weather: [
         {
-          description: 'Загрузка...',
+          description: '...',
           icon: '01d'
         }
       ],
@@ -29,7 +31,7 @@ export default class WeatherWidget extends Component {
   };
 
   apiUrl() {
-    return `${HOST}/data/2.5/weather?q=${LOCATION}&lang=ru&units=metric&appid=${KEY}`;
+    return `${HOST}/data/2.5/weather?q=${LOCATION}&lang=${i18n.language}&units=metric&appid=${KEY}`;
   }
 
   async getWeather() {
@@ -58,9 +60,10 @@ export default class WeatherWidget extends Component {
   }
 
   render({}, { data }) {
+    const { t } = useTranslation();
     return (
       <div class={style.header}>
-        <h1>Погода</h1>
+        <h1></h1>
         <div class={style.wrapper}>
           <div class={style.description}>
             <img class={style.icon} src={ 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
@@ -71,8 +74,8 @@ export default class WeatherWidget extends Component {
             </div>
           </div>
           <div class={style.essential}>
-            <div class={style.essential_feels_like}>Ощущается как <span class={style.degreesC}>{Math.round(data.main.feels_like)}</span></div>
-            <div class={style.essential_humidity}>Влажность {data.main.humidity}%</div>
+            <div class={style.essential_feels_like}>{t('weather.feelsLike')} <span class={style.degreesC}>{Math.round(data.main.feels_like)}</span></div>
+            <div class={style.essential_humidity}>{t('weather.humidity')} {data.main.humidity}%</div>
           </div>
           <div class={style.moon}>
             <MoonWidget />

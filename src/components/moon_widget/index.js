@@ -1,10 +1,11 @@
 import { h, Component } from 'preact';
 const lune = require('lune');
+import { useTranslation } from 'react-i18next';
 
 import style from './style';
 
-
 const REFRESH_INTERVAL = 1*60*60*1000;
+const { t } = useTranslation();
 
 export default class MoonWidget extends Component {
   constructor(props) {
@@ -51,8 +52,8 @@ export default class MoonWidget extends Component {
     return (
       <div class={style.container}>
         <div class={style.icon} data-icon={icon}></div>
-        <div class={style.head}>Луна</div>
-        <div class={style.text}>{age}-й день, фаза {phase}%</div>
+        <div class={style.head}>{t('moon.moon')}</div>
+        <div class={style.text}>{t('moon.age', {age})}, {t('moon.phase')} {phase}%</div>
       </div>
     )
   }

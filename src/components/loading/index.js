@@ -1,6 +1,8 @@
 import { h, Component } from 'preact';
+import { useTranslation } from 'react-i18next';
 
 import style from './style';
+const { t } = useTranslation();
 
 export default class LoadingPart extends Component {
   state = {
@@ -15,8 +17,9 @@ export default class LoadingPart extends Component {
   }
 
   render({loading, noText}) {
+
     return (
-      <div class={style.loading} data-no-text={noText}>Загрузка</div>
+      <div class={style.loading} data-no-text={noText}>{t('misc.loading')}</div>
     )
   }
 }

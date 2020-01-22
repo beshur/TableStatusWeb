@@ -1,0 +1,43 @@
+{
+  "translation": {
+    "misc": {
+      "About": "О проекте",
+      "loading": "Загрузка",
+      "header": "Стенгазета ШуСуАрт"
+    },
+    "google": {
+      "login": "Залогиниться в гугле",
+      "logout": "Разлогиниться"
+    },
+    "calendar": {
+      "today": "Сегодня",
+      "noPlans": "Ничего не запланировано",
+      "selectOther": "Выбрать другой календарь"
+    },
+    "update": {
+      "newVersion": "Новая версия! Нажмите, чтобы обновиться"
+    },
+    "moon": {
+      "moon": "Луна",
+      "phase": "фаза",
+      "age": "{{age}}-й день",
+      "age_plural": "{{age}}-й день"
+    },
+    "photos": {
+      "selectAlbumsHeader": "Выберите альбомы для слайдшоу",
+      "selectOther": "Выбрать другой альбом",
+      "nextPic": "Следующая фотография",
+      "openInNewTab": "Открыть в новой вкладке"
+    },
+    "weather": {
+      "feelsLike": "Ощущается как",
+      "humidity": "Влажность"
+    },
+    "notes": {
+      "title": "Заметки"
+    },
+    "lang": {
+      "button": "eng"
+    }
+  }
+}

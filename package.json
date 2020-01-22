@@ -32,13 +32,15 @@
     "serve": "^11.1.0"
   },
   "dependencies": {
-    "preact-cli": "^3.0.0-rc.6",
-    "preact-cli-plugin-env-vars": "^1.2.1",
+    "i18next": "^19.0.3",
     "lune": "^0.4.0",
     "moment": "^2.24.0",
     "preact": "^10.0.1",
+    "preact-cli": "^3.0.0-rc.6",
+    "preact-cli-plugin-env-vars": "^1.2.1",
     "preact-render-to-string": "^5.1.0",
-    "preact-router": "^3.0.0"
+    "preact-router": "^3.0.0",
+    "react-i18next": "^11.3.1"
   },
   "jest": {
     "preset": "jest-preset-preact",

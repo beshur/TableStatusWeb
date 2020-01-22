@@ -1,3 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 export default function About() {
-  return (<div><a href={process.env.PREACT_APP_ABOUT_URL}>О проекте/About</a></div>)
+  const { t } = useTranslation();
+  //About
+  return (<div><a href={process.env.PREACT_APP_ABOUT_URL}>{t('misc.About')}</a></div>)
 }

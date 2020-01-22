@@ -1,4 +1,5 @@
 import { h, Component } from 'preact';
+import { useTranslation } from 'react-i18next';
 
 import style from './style';
 
@@ -67,8 +68,10 @@ export default class AutoUpdate extends Component {
   }
 
   render({}, {newVersion}) {
+    const { t } = useTranslation();
+
     return (
-      <span>{ newVersion && (<span class={style.button} onClick={() => this.update()}>Новая версия! Нажмите, чтобы обновиться</span>)}</span>
+      <span>{ newVersion && (<span class={style.button} onClick={() => this.update()}>{t('update.newVersion')}</span>)}</span>
     );
   }
 }

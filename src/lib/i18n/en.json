@@ -1,0 +1,43 @@
+{
+  "translation": {
+    "misc": {
+      "About": "About",
+      "loading": "Loading",
+      "header": "ShuSuArt Wall Newspaper"
+    },
+    "google": {
+      "login": "Login with google",
+      "logout": "Logout"
+    },
+    "calendar": {
+      "today": "Today",
+      "noPlans": "No plans",
+      "selectOther": "Select other calendar"
+    },
+    "update": {
+      "newVersion": "New version! Click to update"
+    },
+    "moon": {
+      "moon": "Moon",
+      "phase": "phase",
+      "age": "Day {{age}}",
+      "age_plural": "Day {{age}}"
+    },
+    "photos": {
+      "selectAlbumsHeader": "Select album to show",
+      "selectOther": "Select other album",
+      "nextPic": "Next picture",
+      "openInNewTab": "Open in new tab"
+    },
+    "weather": {
+      "feelsLike": "Feels like",
+      "humidity": "Humidity"
+    },
+    "notes": {
+      "title": "Notes"
+    },
+    "lang": {
+      "button": "рус"
+    }
+  }
+}

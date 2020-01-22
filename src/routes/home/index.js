@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import style from './style';
+import { useTranslation } from 'react-i18next';
 
 import ClockWidget from '../../components/clock_widget';
 import WeatherWidget from '../../components/weather_widget';
@@ -8,6 +8,7 @@ import NotesWidget from '../../components/notes_widget';
 import GoogleApi from '../../components/google_api';
 import PhotosWidget from '../../components/photos_widget';
 
+import style from './style';
 
 export default class Home extends Component {
   state = {
@@ -24,6 +25,7 @@ export default class Home extends Component {
   }
 
   render({googleApiLoaded}, {signedIn}) {
+    const { t } = useTranslation();
     const googleWidgets = (<>
       <CalendarWidget />
       <PhotosWidget />
@@ -33,7 +35,7 @@ export default class Home extends Component {
       <WeatherWidget />
       <ClockWidget />
       { signedIn && googleWidgets }
-      <NotesWidget storageKey="STENGAZETA_NOTES" header="Заметки" />
+      <NotesWidget storageKey="STENGAZETA_NOTES" header={t('notes.title')} />
       <GoogleApi onSignedIn={this.onSignedIn} googleApiLoaded={googleApiLoaded} />
     </div>)
   }

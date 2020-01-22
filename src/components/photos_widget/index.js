@@ -1,5 +1,6 @@
 import { h, Component, createRef } from 'preact';
 import moment from 'moment/moment';
+import { useTranslation } from 'react-i18next';
 
 import { StorageMixin } from '../../lib/mixins';
 import CollapseWidget from '../collapse_widget';
@@ -199,6 +200,8 @@ export default class PhotosWidget extends Component {
   }
 
   render({}, {selectedAlbum, albums, randomPic}) {
+    const { t } = useTranslation();
+
     return (
       <div class={this.isSelectedAlbumHasId() ? 'selected' : ''}>
         <h1>
@@ -208,7 +211,7 @@ export default class PhotosWidget extends Component {
 
         <div class={this.state.collapsed ? style.hide : null}>
           <div class={this.isSelectedAlbumHasId() ? style.hide : ''}>
-            <p>Выберите альбомы для слайдшоу:</p>
+            <p>{t('photos.selectAlbumsHeader')}:</p>
             { !albums.length ? (<LoadingPart noText="true" />) : '' }
             {
               albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
@@ -219,8 +222,8 @@ export default class PhotosWidget extends Component {
             <PhotosWidgetPhotos photo={randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
           </div>
           <div class={!this.isSelectedAlbumHasId() ? style.hide : style.selectOther}>
-            <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>
-            <span onClick={() => this.selectRandomPicFromState()}>Следующая фотография</span>
+            <span onClick={() => this.selectOther()}>{t('photos.selectOther')}</span>
+            <span onClick={() => this.selectRandomPicFromState()}>{t('photos.nextPic')}</span>
           </div>
         </div>
       </div>
@@ -374,8 +377,10 @@ export class PhotosWidgetPhotoItem extends Component {
 
 export class PhotosWidgetVideoLink extends Component {
   render({link}) {
+    const { t } = useTranslation();
+
     return (
-      <a href={link} target="_blank" class={style.extLink} title="Open in a new window"></a>
+      <a href={link} target="_blank" class={style.extLink} title={t('photos.openInNewTab')}></a>
     )
   }
 }

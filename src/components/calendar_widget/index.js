@@ -1,5 +1,6 @@
 import { h, Component } from 'preact';
 import moment from 'moment/moment';
+import { useTranslation } from 'react-i18next';
 
 import CollapseWidget from '../collapse_widget';
 import LoadingPart from '../loading';
@@ -8,6 +9,8 @@ import { StorageMixin } from '../../lib/mixins';
 
 const API_INTERVAL = 60*60*1000;
 const CHECK_MARK = '✅';
+
+const { t } = useTranslation();
 
 export default class CalendarWidget extends Component {
   constructor(props) {
@@ -130,7 +133,7 @@ export default class CalendarWidget extends Component {
   render({}, {calendars, events, loadingEvents}) {
     return (
       <div>
-        <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
+        <h1>{t('calendar.today')} <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
 
         <div class={this.state.collapsed ? style.hide : null}>
 
@@ -150,14 +153,14 @@ export default class CalendarWidget extends Component {
               { loadingEvents ? (<LoadingPart noText="true" />) : '' }
 
               <div class={loadingEvents || (!loadingEvents && events.length) ? style.hide : null}>
-                Ничего не запланировано
+                {t('calendar.noPlans')}
               </div>
             </div>
           </div>
         </div>
 
         <div class={style.selectOther} onClick={() => this.selectOther()}>
-          Выбрать другой календарь
+          {t('calendar.selectOther')}
         </div>
       </div>
     );

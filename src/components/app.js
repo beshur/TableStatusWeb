@@ -1,11 +1,9 @@
 import { h, Component } from 'preact';
 import { Router } from 'preact-router';
 
+import i18n from './i18n';
 import Header from './header';
-
-// Code-splitting is automated for routes
 import Home from '../routes/home';
-
 import BuildId from './build_id';
 import About from './about';
 
