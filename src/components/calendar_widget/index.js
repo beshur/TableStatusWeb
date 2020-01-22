@@ -6,11 +6,8 @@ import LoadingPart from '../loading';
 import style from './style';
 import { StorageMixin } from '../../lib/mixins';
 
-// ShuSu
-const CALENDAR_ID = process.env.PREACT_APP_GOOGLE_CAL_ID;
-
-// 1 hour
 const API_INTERVAL = 60*60*1000;
+const CHECK_MARK = '✅';
 
 export default class CalendarWidget extends Component {
   constructor(props) {
@@ -106,6 +103,30 @@ export default class CalendarWidget extends Component {
     }, () => this.listCalendars());
   }
 
+  updateEvent(item, newSummary) {
+    gapi.client.calendar.events.update({
+      calendarId: this.state.calendarId,
+      eventId: item.id,
+      start: item.start,
+      end: item.end,
+      summary: newSummary
+    }).then((response) => {
+      console.log('Event updated', response);
+      let updatedEvents = this.state.events.map(item => {
+        if (item.id === response.result.id) {
+          return response.result;
+        } else {
+          return item;
+        }
+      });
+      this.setState({
+        events: updatedEvents
+      });
+    }).catch(err => {
+      console.error('CalendarWidget err updating event', err);
+    })
+  }
+
   render({}, {calendars, events, loadingEvents}) {
     return (
       <div>
@@ -123,7 +144,7 @@ export default class CalendarWidget extends Component {
           <div class={!this.state.calendarId ? style.hide : '' }>
             <div class={style.events}>
               {
-                events.map((item) => <CalendarEvent item={item} /> )
+                events.map((item) => <CalendarEvent item={item} onUpdate={(summary) => this.updateEvent(item, summary)} /> )
               }
 
               { loadingEvents ? (<LoadingPart noText="true" />) : '' }
@@ -170,13 +191,29 @@ export class CalendarEvent extends Component {
     if (this.props.item.start.date) {
       result += ' ' + style.item_whole_day;
     }
+    if (this.props.item.summary[0] === CHECK_MARK) {
+      result += ' ' + style.item_done;
+    }
     return result;
+  }
+
+  onClick() {
+    let summary = this.props.item.summary;
+    console.log('clicked', this.props.item, summary);
+
+    if (summary[0] !== CHECK_MARK) {
+      summary = CHECK_MARK + ' ' + summary;
+    } else {
+      summary = summary.substr(2);
+    }
+
+    this.props.onUpdate(summary);
   }
 
   render( {item} ) {
     console.log('CalendarEvent', item);
     return (
-      <div class={this.getClass()}>
+      <div class={this.getClass()} onClick={() => this.onClick()}>
         {this.formatDate(item.start.dateTime)}{item.summary}
       </div>
     )

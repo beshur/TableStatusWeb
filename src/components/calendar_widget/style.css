@@ -7,12 +7,17 @@
   border-radius: 8px;
 }
 
+
 .calendarItem {
   cursor: pointer;
 }
 
 .item_whole_day {
   background: rgba(112, 199, 32, 0.05);
+}
+
+.item_done {
+  opacity: 0.5;
 }
 
 .hide {
