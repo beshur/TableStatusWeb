@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import { Router } from 'preact-router';
 
-import i18n from './i18n';
+import i18n from '../lib/i18n';
 import Header from './header';
 import Home from '../routes/home';
 import BuildId from './build_id';

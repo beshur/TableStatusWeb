@@ -12,7 +12,6 @@ const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/photoslibrary.readonly';
 const CLIENT = process.env.PREACT_APP_GOOGLE_CLIENT;
 const KEY = process.env.PREACT_APP_GOOGLE_API_KEY;
-const { t } = useTranslation();
 
 export default class GoogleApi extends Component {
   constructor(props) {
@@ -98,6 +97,7 @@ export default class GoogleApi extends Component {
   }
 
   render({googleApiLoaded}) {
+    const { t } = useTranslation();
     return (
       <div class={!googleApiLoaded ? style.hide : ''}>
         <button class={this.state.signedIn ? style.hide : ''} onClick={() => this.onAuthorize()}><img src="/assets/icons8-google.svg" /> {t('google.login')}</button>

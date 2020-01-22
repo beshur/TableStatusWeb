@@ -10,8 +10,6 @@ import { StorageMixin } from '../../lib/mixins';
 const API_INTERVAL = 60*60*1000;
 const CHECK_MARK = '✅';
 
-const { t } = useTranslation();
-
 export default class CalendarWidget extends Component {
   constructor(props) {
     super(props);
@@ -131,6 +129,7 @@ export default class CalendarWidget extends Component {
   }
 
   render({}, {calendars, events, loadingEvents}) {
+    const { t } = useTranslation();
     return (
       <div>
         <h1>{t('calendar.today')} <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>

@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import { useTranslation } from 'react-i18next';
 
-import style from './style';
+import style from './style.css';
 
 const API_INTERVAL = 60*60*1000;
 

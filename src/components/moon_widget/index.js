@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import style from './style';
 
 const REFRESH_INTERVAL = 1*60*60*1000;
-const { t } = useTranslation();
 
 export default class MoonWidget extends Component {
   constructor(props) {
@@ -49,6 +48,7 @@ export default class MoonWidget extends Component {
   }
 
   render({}, {age, phase, icon}) {
+    const { t } = useTranslation();
     return (
       <div class={style.container}>
         <div class={style.icon} data-icon={icon}></div>

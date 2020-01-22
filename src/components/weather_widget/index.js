@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import style from './style';
 import MoonWidget from '../moon_widget';
-import i18n from '../i18n';
+import i18n from '../../lib/i18n';
 
 const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;

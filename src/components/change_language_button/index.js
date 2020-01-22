@@ -2,7 +2,7 @@ import { h, Component } from 'preact';
 import { useTranslation } from 'react-i18next';
 
 import { StorageMixin } from '../../lib/mixins';
-import i18n from '../i18n';
+import i18n from '../../lib/i18n';
 
 export default class ChangeLanguageButton extends Component {
   state = {
