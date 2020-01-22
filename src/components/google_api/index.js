@@ -99,7 +99,7 @@ export default class GoogleApi extends Component {
     return (
       <div class={!googleApiLoaded ? style.hide : ''}>
         <button class={this.state.signedIn ? style.hide : ''} onClick={() => this.onAuthorize()}><img src="/assets/icons8-google.svg" /> Залогиниться в гугле</button>
-        <button class={!this.state.signedIn ? style.hide : ''} onClick={() => this.onLogOut()}>Разлогиниться</button>
+        <button class={!this.state.signedIn ? style.hide : ''} onClick={() => this.onLogOut()}><img src="/assets/icons8-google.svg" /> Разлогиниться</button>
       </div>
     );
   }

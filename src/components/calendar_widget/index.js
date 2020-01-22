@@ -16,7 +16,6 @@ export default class CalendarWidget extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      signedIn: false,
       calendarId: '',
       calendars: [],
       events: [],
@@ -29,9 +28,6 @@ export default class CalendarWidget extends Component {
   }
 
   listCalendars() {
-    if (!this.props.signedIn) {
-      return;
-    }
     gapi.client.calendar.calendarList.list().then((response) => {
       let calendars = response.result.items;
       console.log('Calendars count', calendars.length);
@@ -40,10 +36,7 @@ export default class CalendarWidget extends Component {
   }
 
   listUpcomingEvents() {
-    console.log('listUpcomingEvents', this.state.calendarId, this.props.signedIn);
-    if (!this.props.signedIn) {
-      return;
-    }
+    console.log('listUpcomingEvents', this.state.calendarId);
     const today = moment(moment().format('MMMM D YYYY')).toISOString();
     const tomorrow = moment(moment().add(1, 'day').format('MMMM D YYYY')).toISOString();
 
@@ -85,7 +78,7 @@ export default class CalendarWidget extends Component {
 
   componentDidMount() {
     this.loadState(['calendarId'], () => {
-      this.props.signedIn && this.onSignedIn();
+      this.onReady();
     });
   }
 
@@ -95,17 +88,11 @@ export default class CalendarWidget extends Component {
     setTimeout(() => this.listUpcomingEvents(), 0);
   }
 
-  onSignedIn() {
+  onReady() {
     if (this.state.calendarId) {
       this.startTimer();
     } else {
       this.listCalendars();
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (!prevProps.signedIn && this.props.signedIn) {
-      this.onSignedIn();
     }
   }
 
@@ -119,14 +106,12 @@ export default class CalendarWidget extends Component {
     }, () => this.listCalendars());
   }
 
-  render({signedIn}, {calendars, events, loadingEvents}) {
+  render({}, {calendars, events, loadingEvents}) {
     return (
       <div>
         <h1>Сегодня <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
 
-        { !signedIn ? (<div>Сначала надо залогиниться</div>) : '' }
-
-        <div class={!signedIn || this.state.collapsed ? style.hide : null}>
+        <div class={this.state.collapsed ? style.hide : null}>
 
           <div class={this.state.calendarId ? style.hide : '' }>
             { !calendars.length ? (<LoadingPart noText="true" />) : '' }

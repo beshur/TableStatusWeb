@@ -46,10 +46,6 @@ export default class PhotosWidget extends Component {
   }
 
   listAlbums() {
-    if (!this.props.signedIn) {
-      return;
-    }
-
     this.listMyAlbums();
     this.listSharedAlbums();
   }
@@ -80,9 +76,6 @@ export default class PhotosWidget extends Component {
   }
 
   listPhotosOfAlbum() {
-    if (!this.props.signedIn) {
-      return;
-    }
     gapi.client.photoslibrary.mediaItems.search({
       albumId: this.state.selectedAlbum.id,
       pageSize: PHOTOS_LIMIT
@@ -150,9 +143,6 @@ export default class PhotosWidget extends Component {
   }
 
   fetchPicture(id) {
-    if (!this.props.signedIn) {
-      return;
-    }
     gapi.client.photoslibrary.mediaItems.get({
       'mediaItemId': id
     }).then((response) => {
@@ -167,13 +157,7 @@ export default class PhotosWidget extends Component {
     this.getFromStorage();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.signedIn && this.props.signedIn) {
-      this.onSignedIn();
-    }
-  }
-
-  onSignedIn() {
+  onReady() {
     if (this.state.selectedAlbum && this.state.selectedAlbum.id) {
       if (this.state.selectedAlbumPhotos.length) {
         this.startRandomRotator();
@@ -204,9 +188,7 @@ export default class PhotosWidget extends Component {
 
   getFromStorage() {
     this.loadState(['selectedAlbum', 'selectedAlbumPhotos'], () => {
-      if (this.props.signedIn) {
-        this.onSignedIn();
-      }
+      this.onReady();
     });
 
     return true;
@@ -216,27 +198,25 @@ export default class PhotosWidget extends Component {
     return this.state.selectedAlbum && this.state.selectedAlbum.id;
   }
 
-  render({signedIn}, {}) {
+  render({}, {selectedAlbum, albums, randomPic}) {
     return (
       <div class={this.isSelectedAlbumHasId() ? 'selected' : ''}>
         <h1>
-          {this.state.selectedAlbum && this.state.selectedAlbum.title ? this.state.selectedAlbum.title : 'Фото'}
+          {selectedAlbum && selectedAlbum.title ? selectedAlbum.title : 'Фото'}
            <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} />
         </h1>
 
-        { !signedIn ? (<div>Сначала надо залогиниться</div>) : '' }
-
-        <div class={!signedIn || this.state.collapsed ? style.hide : null}>
+        <div class={this.state.collapsed ? style.hide : null}>
           <div class={this.isSelectedAlbumHasId() ? style.hide : ''}>
             <p>Выберите альбомы для слайдшоу:</p>
-            { !this.state.albums.length ? (<LoadingPart noText="true" />) : '' }
+            { !albums.length ? (<LoadingPart noText="true" />) : '' }
             {
-              this.state.albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
+              albums.map((album) => <PhotosWidgetAlbum onClick={() => this.onAlbumSelected(album)} album={album} /> )
             }
           </div>
 
           <div class={!this.isSelectedAlbumHasId() ? style.hide : ''}>
-            <PhotosWidgetPhotos photo={this.state.randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
+            <PhotosWidgetPhotos photo={randomPic} isIOS={this.isIOS}></PhotosWidgetPhotos>
           </div>
           <div class={!this.isSelectedAlbumHasId() ? style.hide : style.selectOther}>
             <span onClick={() => this.selectOther()}>Выбрать другой альбом</span>

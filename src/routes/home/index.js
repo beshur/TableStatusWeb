@@ -24,11 +24,15 @@ export default class Home extends Component {
   }
 
   render({googleApiLoaded}, {signedIn}) {
+    const googleWidgets = (<>
+      <CalendarWidget />
+      <PhotosWidget />
+      </>);
+
     return (<div class={style.home}>
       <WeatherWidget />
       <ClockWidget />
-      <CalendarWidget signedIn={signedIn} />
-      <PhotosWidget signedIn={signedIn} />
+      { signedIn && googleWidgets }
       <NotesWidget storageKey="STENGAZETA_NOTES" header="Заметки" />
       <GoogleApi onSignedIn={this.onSignedIn} googleApiLoaded={googleApiLoaded} />
     </div>)
