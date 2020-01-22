@@ -142,6 +142,10 @@ export default class PhotosWidget extends Component {
       console.error('Photos index non-existent', itemIndex, photos);
       return this.selectRandomPic(photos);
     }
+    if (this.isIOS && photo.mimeType === 'video/mp4') {
+      console.log('Video selected which cannot be played on iOS');
+      return this.selectRandomPic(photos);
+    }
     this.fetchPicture(photo.id);
   }
 
