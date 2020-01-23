@@ -204,10 +204,10 @@ export default class PhotosWidget extends Component {
 
     return (
       <div class={this.isSelectedAlbumHasId() ? 'selected' : ''}>
-        <h1>
+        <h3>
           {selectedAlbum && selectedAlbum.title ? selectedAlbum.title : 'Фото'}
            <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} />
-        </h1>
+        </h3>
 
         <div class={this.state.collapsed ? style.hide : null}>
           <div class={this.isSelectedAlbumHasId() ? style.hide : ''}>

@@ -36,7 +36,7 @@ export default class Home extends Component {
       <ClockWidget />
       { signedIn && googleWidgets }
       <NotesWidget storageKey="STENGAZETA_NOTES" header={t('notes.title')} />
-      <GoogleApi onSignedIn={this.onSignedIn} googleApiLoaded={googleApiLoaded} />
+      { googleApiLoaded && (<GoogleApi onSignedIn={this.onSignedIn} />) }
     </div>)
   }
 };

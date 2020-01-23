@@ -83,27 +83,35 @@ export default class GoogleApi extends Component {
     this.handleSignoutClick();
   }
 
-  // gets called when this route is navigated to
   componentDidMount() {
-    if (this.props.googleApiLoaded) {
-      this.handleClientLoad();
-    }
+    this.handleClientLoad();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.googleApiLoaded && this.props.googleApiLoaded) {
-      this.handleClientLoad();
-    }
-  }
-
-  render({googleApiLoaded}) {
+  render({}, {signedIn}) {
     const { t } = useTranslation();
+    let buttonProps = {
+      onClick: () => this.onLogOut(),
+      title: t('google.logout')
+    }
+    if (!signedIn) {
+      buttonProps = {
+        onClick: () => this.onAuthorize(),
+        title: t('google.login')
+      }
+    }
+    const widgetContent = authButton(buttonProps);
+
     return (
-      <div class={!googleApiLoaded ? style.hide : ''}>
-        <button class={this.state.signedIn ? style.hide : ''} onClick={() => this.onAuthorize()}><img src="/assets/icons8-google.svg" /> {t('google.login')}</button>
-        <button class={!this.state.signedIn ? style.hide : ''} onClick={() => this.onLogOut()}><img src="/assets/icons8-google.svg" /> {t('google.logout')}</button>
+      <div class={style.wrapper}>
+        { widgetContent }
       </div>
     );
   }
+}
+
+export function authButton(props) {
+  return (
+    <button class={style.button} onClick={function() {props.onClick()}}><img src="/assets/icons8-google.svg" /> {props.title}</button>
+  );
 }
 

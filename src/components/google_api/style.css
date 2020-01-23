@@ -1,17 +1,19 @@
-button {
-  padding: 15px 20px;
-  font-size: 20px;
+.wrapper {
+  margin-top: 40px;
+  padding: 20px;
+  text-align: center;
+}
+
+.button {
+  padding: 10px 15px;
+  font-size: 15px;
   background: rgba(80, 150, 255, 0.05);
   border-radius: 8px;
   box-shadow: none;
   border: 1px solid #ddd;
 }
-button img {
-  max-width: 22px;
+.button img {
+  max-width: 18px;
   float: left;
   margin-right: 12px;
-}
-
-.hide {
-  display: none;
 }

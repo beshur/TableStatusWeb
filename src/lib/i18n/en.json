@@ -10,7 +10,9 @@
       "logout": "Logout"
     },
     "calendar": {
+      "title": "Agenda",
       "today": "Today",
+      "tomorrow": "Tomorrow",
       "noPlans": "No plans",
       "selectOther": "Select other calendar"
     },

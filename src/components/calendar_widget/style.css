@@ -29,3 +29,11 @@
   color: #666;
   font-size: 14px;
 }
+
+.collapseWrap {
+  float: right;
+}
+
+.subtitle {
+  color: #666;
+}

@@ -9,6 +9,7 @@ import { StorageMixin } from '../../lib/mixins';
 
 const API_INTERVAL = 60*60*1000;
 const CHECK_MARK = '✅';
+const TMRW_START_TIME = 17;
 
 export default class CalendarWidget extends Component {
   constructor(props) {
@@ -22,6 +23,7 @@ export default class CalendarWidget extends Component {
     }
 
     Object.assign(this, new StorageMixin('CalendarWidget'));
+    this.updateEvent = this.updateEvent.bind(this);
     this.timer = null;
   }
 
@@ -34,24 +36,38 @@ export default class CalendarWidget extends Component {
   }
 
   listUpcomingEvents() {
-    console.log('listUpcomingEvents', this.state.calendarId);
-    const today = moment(moment().format('MMMM D YYYY')).toISOString();
-    const tomorrow = moment(moment().add(1, 'day').format('MMMM D YYYY')).toISOString();
+    const dayStartParams = {
+      hour:0,
+      minute:0,
+      second:0,
+      millisecond:0
+    };
+    const todayMoment = moment().set(dayStartParams);
+    const todayString = todayMoment.toISOString();
 
+    let nextMoment = todayMoment.clone();
+    let daysDelta = 1;
+    if (moment().hours() >= TMRW_START_TIME) {
+      daysDelta = 2;
+    }
+    const nextString = nextMoment.add(daysDelta, 'days').toISOString();
+
+    console.log('listUpcomingEvents', this.state.calendarId, todayString, nextString);
     this.setState({
       loadingEvents: true
     });
 
     gapi.client.calendar.events.list({
       'calendarId': this.state.calendarId,
-      'timeMin': today,
-      'timeMax': tomorrow,
+      'timeMin': todayString,
+      'timeMax': nextString,
       'showDeleted': false,
       'singleEvents': true,
       'maxResults': 10,
       'orderBy': 'startTime'
     }).then((response) => {
       let events = response.result.items;
+      console.log('listUpcomingEvents events', events);
       this.setState({
         events,
         loadingEvents: false
@@ -104,13 +120,27 @@ export default class CalendarWidget extends Component {
     }, () => this.listCalendars());
   }
 
-  updateEvent(item, newSummary) {
+  toggleEventSummary(item) {
+    let summary = item.summary;
+    console.log('clicked', item, summary);
+
+    if (summary[0] !== CHECK_MARK) {
+      summary = CHECK_MARK + ' ' + summary;
+    } else {
+      summary = summary.substr(2);
+    }
+
+    return summary;
+  }
+
+  updateEvent(item) {
+    const summary = this.toggleEventSummary(item);
     gapi.client.calendar.events.update({
       calendarId: this.state.calendarId,
       eventId: item.id,
       start: item.start,
       end: item.end,
-      summary: newSummary
+      summary
     }).then((response) => {
       console.log('Event updated', response);
       let updatedEvents = this.state.events.map(item => {
@@ -128,41 +158,76 @@ export default class CalendarWidget extends Component {
     })
   }
 
-  render({}, {calendars, events, loadingEvents}) {
+  render({}, {calendars, events, loadingEvents, collapsed}) {
     const { t } = useTranslation();
-    return (
-      <div>
-        <h1>{t('calendar.today')} <CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></h1>
+    const now = moment();
+    const timeForTomorrowGroup = now.hour() >= TMRW_START_TIME;
 
-        <div class={this.state.collapsed ? style.hide : null}>
+    const todayGroup = events.filter(item => {
+      return moment(item.start.date || item.start.dateTime).day() === now.day();
+    });
+    const tomorrowGroup = events.filter(item => {
+      return moment(item.start.date || item.start.dateTime).day() > now.day();
+    });
 
-          <div class={this.state.calendarId ? style.hide : '' }>
-            { !calendars.length ? (<LoadingPart noText="true" />) : '' }
-            {
-              calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
-            }
-          </div>
-
-          <div class={!this.state.calendarId ? style.hide : '' }>
-            <div class={style.events}>
-              {
-                events.map((item) => <CalendarEvent item={item} onUpdate={(summary) => this.updateEvent(item, summary)} /> )
-              }
-
-              { loadingEvents ? (<LoadingPart noText="true" />) : '' }
-
-              <div class={loadingEvents || (!loadingEvents && events.length) ? style.hide : null}>
-                {t('calendar.noPlans')}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class={style.selectOther} onClick={() => this.selectOther()}>
-          {t('calendar.selectOther')}
-        </div>
+    // partials
+    const calendarsPart = (
+      <div class={this.state.calendarId ? style.hide : '' }>
+        <h3>Выбрать календарь</h3>
+        { !calendars.length ? (<LoadingPart noText="true" />) : '' }
+        {
+          calendars.map((item) => <CalendarItem onSelect={() => this.onSelectCalendar(item)} item={item} /> )
+        }
       </div>
     );
+
+    const tomorrowPart = timeForTomorrowGroup && (<CalendarEventsGroup
+      events={tomorrowGroup}
+      title={t('calendar.tomorrow')}
+      onUpdate={this.updateEvent} />);
+
+    const eventsPart = (
+      <div class={!this.state.calendarId ? style.hide : '' }>
+        { loadingEvents ? (<LoadingPart noText="true" />) : '' }
+        { !loadingEvents && (
+          <div class={style.events}>
+            <CalendarEventsGroup events={todayGroup} title={t('calendar.today')} onUpdate={this.updateEvent} />
+            { tomorrowPart }
+          </div>
+        )}
+      </div>
+    );
+
+    const selectOtherPart = (
+      <div class={style.selectOther} onClick={() => this.selectOther()}>
+        {t('calendar.selectOther')}
+      </div>
+    );
+
+    const widgetContent = [ calendarsPart, eventsPart , selectOtherPart ];
+
+    return (
+      <div>
+        <div class={style.collapseWrap}><CollapseWidget onClick={(collapsed) => this.setState({collapsed})} /></div>
+        { collapsed && (<h3>{t('calendar.title')}</h3>) }
+        { !collapsed && widgetContent }
+      </div>
+    );
+  }
+}
+
+export class CalendarEventsGroup extends Component {
+  render({events, title, onUpdate}) {
+    const { t } = useTranslation();
+    return (
+      <div class={style.group}>
+        <h3 class={style.subtitle}>{title}</h3>
+        {
+          events.map((item) => <CalendarEvent item={item} onUpdate={() => onUpdate(item)} /> )
+        }
+        { !events.length && (<div>{t('calendar.noPlans')}</div>) }
+      </div>
+    )
   }
 }
 
@@ -199,23 +264,10 @@ export class CalendarEvent extends Component {
     return result;
   }
 
-  onClick() {
-    let summary = this.props.item.summary;
-    console.log('clicked', this.props.item, summary);
-
-    if (summary[0] !== CHECK_MARK) {
-      summary = CHECK_MARK + ' ' + summary;
-    } else {
-      summary = summary.substr(2);
-    }
-
-    this.props.onUpdate(summary);
-  }
-
-  render( {item} ) {
+  render( {item, onUpdate} ) {
     console.log('CalendarEvent', item);
     return (
-      <div class={this.getClass()} onClick={() => this.onClick()}>
+      <div class={this.getClass()} onClick={function() {onUpdate()}}>
         {this.formatDate(item.start.dateTime)}{item.summary}
       </div>
     )

@@ -30,7 +30,7 @@ export default class NotesWidget extends Component {
   render({}, { text }) {
     return (
       <div class={style.header}>
-        <h1>{this.props.header}</h1>
+        <h3>{this.props.header}</h3>
         <div>
           <textarea onChange={e => this.onChange(e)}>{text}</textarea>
         </div>
