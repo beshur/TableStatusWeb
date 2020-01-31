@@ -33,7 +33,9 @@
     },
     "weather": {
       "feelsLike": "Feels like",
-      "humidity": "Humidity"
+      "humidity": "Humidity",
+      "select_units": "Select temperature units",
+      "location": "Location for weather forecast"
     },
     "notes": {
       "title": "Notes"

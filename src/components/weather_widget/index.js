@@ -5,6 +5,8 @@ import style from './style';
 import MoonWidget from '../moon_widget';
 import i18n from '../../lib/i18n';
 
+import WeatherConfigWidget from './config';
+
 const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;
 const LOCATION = process.env.PREACT_APP_WEATHER_LOCATION;
@@ -59,11 +61,16 @@ export default class WeatherWidget extends Component {
     clearInterval(this.timer);
   }
 
+  onConfigChange(newConfig) {
+    console.log('onConfigChange', newConfig);
+  }
+
   render({}, { data }) {
     const { t } = useTranslation();
     return (
       <div class={style.header}>
         <h1></h1>
+        <WeatherConfigWidget onChange={(newConfig) => this.onConfigChange(newConfig)} />
         <div class={style.wrapper}>
           <div class={style.description}>
             <img class={style.icon} src={ 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
