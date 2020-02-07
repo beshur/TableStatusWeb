@@ -10,8 +10,7 @@ export default class CollapseWidget extends Component {
   onClick() {
     this.setState({
       collapsed: !this.state.collapsed
-    });
-    this.props.onClick(!this.state.collapsed);
+    }, () => this.props.onClick(this.state.collapsed))
   }
 
   render() {

@@ -30,6 +30,14 @@
   content: '°C'
 }
 
+.degreesF {
+  font-size: 40px;
+}
+
+.degreesF::after {
+  content: '°F'
+}
+
 .essential {
   font-size: 20px;
 }
@@ -53,4 +61,8 @@
 
 .essential_humidity {
   font-size: 24px;
+}
+
+.configButton {
+  float: right;
 }

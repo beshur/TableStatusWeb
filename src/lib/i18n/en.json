@@ -35,7 +35,8 @@
       "feelsLike": "Feels like",
       "humidity": "Humidity",
       "select_units": "Select temperature units",
-      "location": "Location for weather forecast"
+      "location": "Location for weather forecast",
+      "geolocation": "🧭 Geolocation"
     },
     "notes": {
       "title": "Notes"

@@ -17,7 +17,10 @@ export function StorageMixin(prefix) {
     loadState: function(keys, cb) {
       const loaded = {};
       keys.map(key => {
-        loaded[key] = this.storage.getItem(key);
+        let value = this.storage.getItem(key)
+        if (value !== null) {
+          loaded[key] = value;
+        }
         return key;
       });
       console.log('Storage loadState', loaded);

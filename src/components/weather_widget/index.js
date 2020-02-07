@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next';
 import style from './style';
 import MoonWidget from '../moon_widget';
 import i18n from '../../lib/i18n';
+import { StorageMixin } from '../../lib/mixins';
 
 import WeatherConfigWidget from './config';
+import ConfigButtonWidget from '../config_button_widget';
 
 const HOST = 'https://api.openweathermap.org';
 const KEY = process.env.PREACT_APP_OPENWEATHER_API_KEY;
@@ -29,11 +31,38 @@ export default class WeatherWidget extends Component {
         temp_max: '',
         humidity: ''
       }
-    }
-  };
+    },
+    location: LOCATION,
+    units: 'C',
+    displayConfig: false
+  }
+
+  constructor(props) {
+    super(props);
+    Object.assign(this, new StorageMixin('WeatherConfig'));
+  }
 
   apiUrl() {
-    return `${HOST}/data/2.5/weather?q=${LOCATION}&lang=${i18n.language}&units=metric&appid=${KEY}`;
+    console.log('w apiUrl', this.state);
+    let params = {
+      units: this.state.units === 'C' ? 'metric' : 'imperial',
+      lang: i18n.language,
+      appid: KEY
+    }
+    let location = this.state.location;
+    if (typeof location === 'string') {
+      params.q = location;
+    } else {
+      params.lon = location.lon;
+      params.lat = location.lat;
+    }
+    let baseUrl = HOST + '/data/2.5/weather?';
+
+    for (let prop in params) {
+      baseUrl += `${prop}=${params[prop]}&`;
+    }
+
+    return baseUrl;
   }
 
   async getWeather() {
@@ -53,8 +82,8 @@ export default class WeatherWidget extends Component {
 
   // gets called when this route is navigated to
   async componentDidMount() {
-    this.updateWeather();
     this.timer = setInterval(this.updateWeather.bind(this), API_INTERVAL);
+    this.loadState(['location', 'units'], () => this.updateWeather());
   }
 
   componentWillUnmount() {
@@ -63,31 +92,48 @@ export default class WeatherWidget extends Component {
 
   onConfigChange(newConfig) {
     console.log('onConfigChange', newConfig);
+    this.saveState(newConfig, () => this.updateWeather());
   }
 
-  render({}, { data }) {
+  render({}, { data, location, units, displayConfig }) {
     const { t } = useTranslation();
+    let degreesStyle = style['degrees' + units];
+    let config = {
+      location,
+      units
+    };
+
+    let configWidget = displayConfig && (
+        <WeatherConfigWidget
+          initData={config}
+          onChange={(newConfig) => this.onConfigChange(newConfig)} />)
+
     return (
       <div class={style.header}>
         <h1></h1>
-        <WeatherConfigWidget onChange={(newConfig) => this.onConfigChange(newConfig)} />
+
+        <div class={style.configButton}>
+          <ConfigButtonWidget onClick={(displayConfig) => this.setState({displayConfig})} />
+        </div>
         <div class={style.wrapper}>
           <div class={style.description}>
             <img class={style.icon} src={ 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
             <span>{data.weather[0].description}</span>
             <div class={style.essential_temp}>
-              <span class={style.degreesC}>{data.main.temp_max}</span> /
-              <span class={style.degreesC}>{data.main.temp_min}</span>
+              <span class={degreesStyle}>{data.main.temp_max}</span> /
+              <span class={degreesStyle}>{data.main.temp_min}</span>
             </div>
           </div>
           <div class={style.essential}>
-            <div class={style.essential_feels_like}>{t('weather.feelsLike')} <span class={style.degreesC}>{Math.round(data.main.feels_like)}</span></div>
+            <div class={style.essential_feels_like}>{t('weather.feelsLike')} <span class={degreesStyle}>{Math.round(data.main.feels_like)}</span></div>
             <div class={style.essential_humidity}>{t('weather.humidity')} {data.main.humidity}%</div>
           </div>
           <div class={style.moon}>
             <MoonWidget />
           </div>
         </div>
+
+        { configWidget }
 
       </div>
     );

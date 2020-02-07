@@ -1,0 +1,32 @@
+.wrapper {
+  padding: 15px 30px;
+  margin: 20px 0;
+  background: white;
+}
+
+.wrapper label {
+  display: block;
+  font-size: 20px;
+}
+
+.wrapper input,
+.wrapper select,
+.wrapper textarea,
+.wrapper button {
+  padding: 8px 14px;
+  width: 300px;
+  font-size: 16px;
+}
+
+.wrapper button {
+  width: auto;
+}
+
+.buttonNoBorder {
+  background: transparent;
+  border: 0;
+}
+
+.formLine {
+  margin-bottom: 20px;
+}
