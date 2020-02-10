@@ -11,6 +11,7 @@ export default class AutoUpdate extends Component {
   attr = 'data-build-id';
 
   state = {
+    version: process.env.PREACT_APP_BUILD_ID,
     newVersion: false
   }
 
@@ -29,8 +30,7 @@ export default class AutoUpdate extends Component {
   onResult() {
     let newVersion = this.compareVersions();
     if (newVersion) {
-      console.log('AutoUpdate new version', newVersion);
-      this.setState({newVersion});
+      console.log('AutoUpdate new version');
     } else {
       console.log('AutoUpdate old version');
       this.timer = setTimeout(() => this.check(), API_INTERVAL);
@@ -49,10 +49,22 @@ export default class AutoUpdate extends Component {
     return theAttr.value;
   }
 
+  getOldVersion() {
+    return process.env.PREACT_APP_BUILD_ID;
+  }
+
   compareVersions() {
     let newVersion = this.getVersion();
     console.log('AutoUpdate got version', newVersion);
-    return newVersion && newVersion !== process.env.PREACT_APP_BUILD_ID;
+    if (newVersion && newVersion !== this.state.version) {
+      this.setState({
+        version: newVersion,
+        newVersion: true
+      });
+      return true;
+    } else {
+      return false;
+    }
   }
 
   componentDidMount() {
@@ -63,15 +75,15 @@ export default class AutoUpdate extends Component {
     clearInterval(this.timer);
   }
 
-  update() {
-    window.location.reload();
+  onClick() {
+    window.location.href = '/?v=' + this.state.version;
   }
 
-  render({}, {newVersion}) {
+  render({}, {version, newVersion}) {
     const { t } = useTranslation();
-
+    const updateButton = newVersion && (<a href='#' onClick={() => this.onClick()}>{t('update.newVersion')}</a>);
     return (
-      <span>{ newVersion && (<span class={style.button} onClick={() => this.update()}>{t('update.newVersion')}</span>)}</span>
+      <span>{ updateButton }</span>
     );
   }
 }
