@@ -9,7 +9,7 @@ const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-const SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/photoslibrary.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/photoslibrary.readonly';
 const CLIENT = process.env.PREACT_APP_GOOGLE_CLIENT;
 const KEY = process.env.PREACT_APP_GOOGLE_API_KEY;
 
