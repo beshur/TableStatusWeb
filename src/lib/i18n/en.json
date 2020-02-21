@@ -3,7 +3,9 @@
     "misc": {
       "About": "About",
       "loading": "Loading",
-      "header": "ShuSuArt Wall Newspaper"
+      "header": "ShuSuArt Wall Newspaper",
+      "demo": "Demo",
+      "Feedback": "Feedback"
     },
     "google": {
       "login": "Login with google",

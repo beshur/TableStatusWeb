@@ -4,8 +4,7 @@ import { Router } from 'preact-router';
 import i18n from '../lib/i18n';
 import Header from './header';
 import Home from '../routes/home';
-import BuildId from './build_id';
-import About from './about';
+import Footer from './footer';
 
 export default class App extends Component {
 
@@ -48,10 +47,7 @@ export default class App extends Component {
 					<Home path="/" googleApiLoaded={googleApiLoaded} />
 				</Router>
 
-				<div style="display: flex; text-align: center; justify-content: center;">
-					<BuildId />
-					<About />
-				</div>
+				<Footer />
 			</div>
 		);
 	}

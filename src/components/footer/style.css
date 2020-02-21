@@ -1,0 +1,9 @@
+.wrap {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+}
+
+.wrap > div {
+  padding: 0 5px;
+}
