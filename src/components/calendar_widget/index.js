@@ -7,6 +7,8 @@ import LoadingPart from '../loading';
 import style from './style';
 import { StorageMixin } from '../../lib/mixins';
 
+import TimerCheck from '../../lib/timer-check';
+
 const API_INTERVAL = 60*60*1000;
 const CHECK_MARK = '✅';
 const TMRW_START_TIME = 17;
@@ -36,6 +38,10 @@ export default class CalendarWidget extends Component {
   }
 
   listUpcomingEvents() {
+    if (!this.state.calendarId) {
+      return;
+    }
+
     const dayStartParams = {
       hour:0,
       minute:0,
@@ -108,6 +114,8 @@ export default class CalendarWidget extends Component {
     } else {
       this.listCalendars();
     }
+
+    TimerCheck.on(() => this.listUpcomingEvents());
   }
 
   componentWillUnmount() {
