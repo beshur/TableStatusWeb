@@ -3,7 +3,7 @@
 
 .icon {
   float: left;
-  width: 60px;
+  width: 40px;
   margin-right: 20px;
   background: #d8d8d8;
   border-radius: 50%;
@@ -22,23 +22,21 @@
   font-size: 30px;
 }
 
-.degreesC {
-  font-size: 40px;
+div .degrees {
+  font-size: 30px;
+}
+div .degreesUnits {
+  font-size: 25px;
 }
 
-.degreesC::after {
-  content: '°C'
+.weather_name {
+  margin-right: 15px;
+  text-transform: capitalize;
 }
 
-.degreesF {
-  font-size: 40px;
-}
-
-.degreesF::after {
-  content: '°F'
-}
 
 .essential {
+  margin: 10px 0 0 60px;
   font-size: 20px;
 }
 

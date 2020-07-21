@@ -97,11 +97,11 @@ export default class WeatherWidget extends Component {
 
   render({}, { data, location, units, displayConfig }) {
     const { t } = useTranslation();
-    let degreesStyle = style['degrees' + units];
     let config = {
       location,
       units
     };
+    let unitText = (<span class={style.degreesUnits}>°{units}</span>);
 
     let configWidget = displayConfig && (
         <WeatherConfigWidget
@@ -118,15 +118,15 @@ export default class WeatherWidget extends Component {
         <div class={style.wrapper}>
           <div class={style.description}>
             <img class={style.icon} src={ 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png'} />
-            <span>{data.weather[0].description}</span>
-            <div class={style.essential_temp}>
-              <span class={degreesStyle}>{data.main.temp_max}</span> /
-              <span class={degreesStyle}>{data.main.temp_min}</span>
+            <span class={style.weather_name}>{data.weather[0].description}</span>
+            <span class={style.essential_temp}>
+              <span class={style.degrees}>{data.main.temp_max}{unitText}</span>..
+              <span class={style.degrees}>{data.main.temp_min}{unitText}</span>
+            </span>
+
+            <div class={style.essential}>
+              <div class={style.essential_humidity}>{t('weather.humidity')} {data.main.humidity}%</div>
             </div>
-          </div>
-          <div class={style.essential}>
-            <div class={style.essential_feels_like}>{t('weather.feelsLike')} <span class={degreesStyle}>{Math.round(data.main.feels_like)}</span></div>
-            <div class={style.essential_humidity}>{t('weather.humidity')} {data.main.humidity}%</div>
           </div>
           <div class={style.moon}>
             <MoonWidget />
