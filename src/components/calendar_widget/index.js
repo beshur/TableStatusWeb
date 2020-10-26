@@ -273,7 +273,7 @@ export class CalendarEvent extends Component {
   }
 
   render( {item, onUpdate} ) {
-    console.log('CalendarEvent', item);
+    // console.log('CalendarEvent', item);
     return (
       <div class={this.getClass()} onClick={function() {onUpdate()}}>
         {this.formatDate(item.start.dateTime)}{item.summary}
